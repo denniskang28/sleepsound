@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&amp;family=Noto+Sans+SC:wght@300;400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.469.0/font/lucide.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0A0F17}
+button,input{font-family:inherit}
+a{color:#78C7BB}
+a:hover{color:#A6DED5}
+button:focus-visible{outline:2px solid #78C7BB;outline-offset:2px}
+@keyframes msBreath{0%{transform:scale(.4);opacity:0}35%{opacity:.8}100%{transform:scale(1);opacity:0}}
+@keyframes msWave{0%,100%{transform:scaleY(.18)}50%{transform:scaleY(1)}}
+@keyframes msSpin{to{transform:rotate(360deg)}}
+@keyframes msPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes msUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes msFade{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#0A0F17;color:#F1ECE3;font-family:Archivo,'Noto Sans SC',sans-serif;display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start;padding:40px 24px;">
+
+<sc-if value="{{ showPanels }}" hint-placeholder-val="{{ true }}">
+<div style="width:300px;display:flex;flex-direction:column;gap:28px;">
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:18px;background:rgba(120,199,187,.16);color:#78C7BB;display:flex;align-items:center;justify-content:center;"><i class="icon-moon" style="font-size:18px"></i></div><div style="font-size:20px;font-weight:600;">眠声 · 交互原型</div></div>
+    <div style="font-size:14px;line-height:1.7;color:#AAB4C2;">Android · 412 × 915 dp。右侧手机可直接点击操作；下方入口可跳转到流程节点和异常状态。</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="font-size:12px;letter-spacing:.08em;color:#7F8A9B;">核心流程</div>
+    <sc-for list="{{ flow }}" as="f" hint-placeholder-count="7">
+      <button onClick="{{ f.go }}" style="display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid #222D3D;background:#121A26;color:#F1ECE3;font-size:14px;text-align:left;cursor:pointer;" style-hover="background:#1B2533">
+        <span style="font-size:12px;color:#78C7BB;width:18px;">{{ f.n }}</span><span>{{ f.label }}</span>
+      </button>
+    </sc-for>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="font-size:12px;letter-spacing:.08em;color:#7F8A9B;">状态演示</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <sc-for list="{{ scenarios }}" as="c" hint-placeholder-count="12">
+        <button onClick="{{ c.go }}" style="min-height:44px;padding:8px 12px;border-radius:12px;border:1px solid #222D3D;background:#121A26;color:#D8D2C8;font-size:13px;text-align:left;cursor:pointer;line-height:1.35;" style-hover="background:#1B2533">{{ c.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<div style="flex:none;padding:10px;border-radius:50px;background:#03050A;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px #1E2633;">
+<div style="position:relative;width:412px;height:915px;border-radius:40px;overflow:hidden;background:{{ phoneBg }};">
+
+  <div style="position:absolute;top:0;left:0;right:0;height:36px;z-index:70;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:500;color:{{ sb.color }};pointer-events:none;">
+    <span>{{ sb.time }}</span>
+    <div style="position:absolute;left:50%;top:11px;width:12px;height:12px;margin-left:-6px;border-radius:6px;background:#000;"></div>
+    <div style="display:flex;gap:6px;align-items:center;"><i class="icon-signal-high" style="font-size:15px"></i><i class="icon-wifi" style="font-size:15px"></i><i class="icon-battery-medium" style="font-size:17px"></i></div>
+  </div>
+
+  <!-- ONBOARD -->
+  <sc-if value="{{ on.onboard }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 0 20px;display:flex;flex-direction:column;">
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:40px 28px 24px;display:flex;flex-direction:column;gap:36px;">
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:40px;height:40px;border-radius:20px;background:rgba(120,199,187,.16);color:#78C7BB;display:flex;align-items:center;justify-content:center;"><i class="icon-moon" style="font-size:20px"></i></div><span style="font-size:20px;font-weight:600;">眠声</span></div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="font-size:32px;line-height:1.3;font-weight:600;text-wrap:pretty;">早晨一分钟，<br>听懂昨夜的声音</div>
+        <div style="font-size:15px;line-height:1.7;color:#AAB4C2;">睡前把手机放在床头，眠声会在夜里安静地记录，早晨给你一份简洁的报告。</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:18px;flex:none;border-radius:20px;background:#1B2533;"><div style="width:44px;height:44px;flex:none;border-radius:14px;background:rgba(217,168,91,.15);color:#D9A85B;display:flex;align-items:center;justify-content:center;"><i class="icon-audio-lines" style="font-size:22px"></i></div><div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16px;font-weight:600;">记录鼾声</div><div style="font-size:14px;line-height:1.6;color:#AAB4C2;">统计鼾声累计时长与占比，标出集中出现的时段。</div></div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:18px;flex:none;border-radius:20px;background:#1B2533;"><div style="width:44px;height:44px;flex:none;border-radius:14px;background:rgba(169,155,230,.16);color:#A99BE6;display:flex;align-items:center;justify-content:center;"><i class="icon-message-circle" style="font-size:22px"></i></div><div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16px;font-weight:600;">捕捉疑似梦话</div><div style="font-size:14px;line-height:1.6;color:#AAB4C2;">夜里的说话声会被单独保存，方便第二天确认。</div></div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:18px;flex:none;border-radius:20px;background:#1B2533;"><div style="width:44px;height:44px;flex:none;border-radius:14px;background:rgba(120,199,187,.16);color:#78C7BB;display:flex;align-items:center;justify-content:center;"><i class="icon-headphones" style="font-size:22px"></i></div><div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16px;font-weight:600;">早晨回听</div><div style="font-size:14px;line-height:1.6;color:#AAB4C2;">优先推荐值得一听的片段，不用翻完整夜录音。</div></div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:#7F8A9B;"><i class="icon-shield-check" style="font-size:16px"></i>录音默认仅保存在本机</div>
+    </div>
+    <div style="padding:12px 24px 20px;">
+      <button onClick="{{ act.finishOnboard }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:#8FD4C9">开始使用<i class="icon-arrow-right" style="font-size:20px"></i></button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- HOME -->
+  <sc-if value="{{ on.home }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;top:36px;left:0;right:0;bottom:100px;overflow-y:auto;scrollbar-width:none;padding:12px 20px 32px;display:flex;flex-direction:column;gap:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;height:48px;">
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:32px;height:32px;border-radius:16px;background:rgba(120,199,187,.16);color:#78C7BB;display:flex;align-items:center;justify-content:center;"><i class="icon-moon" style="font-size:16px"></i></div><span style="font-size:18px;font-weight:600;">眠声</span></div>
+      <span style="font-size:13px;color:#7F8A9B;">10月17日 周六</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;padding:4px 0 4px;">
+      <div style="font-size:28px;font-weight:600;">{{ home.greet }}</div>
+      <div style="font-size:15px;color:#AAB4C2;">{{ home.sub }}</div>
+    </div>
+
+    <sc-if value="{{ home.session }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;border-radius:24px;background:#1B2533;border:1px solid rgba(120,199,187,.35);padding:20px;display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#78C7BB;">{{ pulseDot }}<span>{{ home.sessState }}</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:13px;color:#AAB4C2;">已监测</span><span style="font-size:36px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em;">{{ mon.hms }}</span></div>
+        <div style="display:flex;flex-direction:column;gap:4px;text-align:right;"><span style="font-size:13px;color:#AAB4C2;">开始于</span><span style="font-size:20px;font-weight:500;">23:30</span></div>
+      </div>
+      <button onClick="{{ act.toMonitor }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:#8FD4C9">返回监测<i class="icon-moon" style="font-size:20px"></i></button>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ home.showStart }}" hint-placeholder-val="{{ true }}">
+    <div style="border-radius:24px;background:linear-gradient(160deg,#1E2B3B,#1B2533 60%);flex:none;padding:22px 20px 20px;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:75px;border:1px solid rgba(120,199,187,.12);"></div>
+      <div style="position:absolute;right:0;top:0;width:90px;height:90px;border-radius:45px;border:1px solid rgba(120,199,187,.18);"></div>
+      <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:13px;color:#78C7BB;">今晚</span><span style="font-size:20px;font-weight:600;">睡前放好手机，一键开始</span><span style="font-size:14px;color:#AAB4C2;">开始前会快速检查麦克风、电量和环境</span></div>
+      <button onClick="{{ act.startFlow }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:#8FD4C9">开始今晚监测<i class="icon-arrow-right" style="font-size:20px"></i></button>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ home.has }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:none;border-radius:24px;background:#1B2533;display:flex;flex-direction:column;">
+      <div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:#AAB4C2;">最近一晚</span><span style="font-size:12px;padding:4px 10px;border-radius:12px;background:rgba(232,144,127,.14);color:#EDA99B;">部分中断</span></div>
+        <div style="font-size:18px;font-weight:600;">10月16日 夜间</div>
+        <div style="font-size:13px;color:#7F8A9B;">23:30 – 次日 07:00</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:0;padding:20px;">
+        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:12px;color:#AAB4C2;">有效监测</span><div style="display:flex;align-items:baseline;"><span style="font-size:28px;font-weight:600;">7</span><span style="font-size:12px;color:#AAB4C2;margin:0 4px 0 2px;">小时</span><span style="font-size:28px;font-weight:600;">00</span><span style="font-size:12px;color:#AAB4C2;margin-left:2px;">分</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:1px solid #2B3749;padding-left:14px;"><span style="font-size:12px;color:#AAB4C2;">鼾声</span><div style="display:flex;align-items:baseline;"><span style="font-size:28px;font-weight:600;color:#E2B56A;">{{ last.snore }}</span><span style="font-size:12px;color:#AAB4C2;margin-left:2px;">分</span></div><span style="font-size:12px;color:#7F8A9B;">占比 {{ last.ratio }}%</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:1px solid #2B3749;padding-left:14px;"><span style="font-size:12px;color:#AAB4C2;">疑似梦话</span><div style="display:flex;align-items:baseline;"><span style="font-size:28px;font-weight:600;color:#B7AAEC;">{{ last.talk }}</span><span style="font-size:12px;color:#AAB4C2;margin-left:2px;">段</span></div></div>
+      </div>
+      <button onClick="{{ act.openLastReport }}" style="height:56px;border:none;border-top:1px solid #2B3749;background:transparent;color:#78C7BB;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:space-between;padding:0 20px;cursor:pointer;border-radius:0 0 24px 24px;" style-hover="background:rgba(120,199,187,.06)">查看报告<i class="icon-chevron-right" style="font-size:20px"></i></button>
+    </div>
+    <div style="border-radius:20px;background:#161F2C;padding:16px;display:flex;gap:14px;align-items:flex-start;">
+      <div style="width:40px;height:40px;flex:none;border-radius:12px;background:#222E3F;color:#AAB4C2;display:flex;align-items:center;justify-content:center;"><i class="icon-smartphone" style="font-size:20px"></i></div>
+      <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:14px;font-weight:500;">摆放提示</span><span style="font-size:13px;line-height:1.6;color:#AAB4C2;">手机放在床头，距枕边约 30–50 厘米，麦克风朝向你、不要被遮挡。</span></div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ home.empty }}" hint-placeholder-val="{{ false }}">
+    <div style="border-radius:28px;background:#161F2C;padding:32px 24px 24px;display:flex;flex-direction:column;gap:24px;">
+      <div style="position:relative;width:100%;height:170px;display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;width:170px;height:170px;border-radius:85px;border:1px solid rgba(120,199,187,.10);"></div>
+        <div style="position:absolute;width:122px;height:122px;border-radius:61px;border:1px solid rgba(120,199,187,.18);"></div>
+        <div style="position:absolute;width:76px;height:76px;border-radius:38px;background:rgba(120,199,187,.12);"></div>
+        <i class="icon-moon" style="font-size:30px;color:#78C7BB;position:relative;"></i>
+        <div style="position:absolute;left:18px;top:38px;width:10px;height:10px;border-radius:5px;background:#D9A85B;opacity:.7;"></div>
+        <div style="position:absolute;right:30px;bottom:30px;width:8px;height:8px;transform:rotate(45deg);background:#A99BE6;opacity:.8;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:22px;font-weight:600;line-height:1.4;">还没有监测记录</div>
+        <div style="font-size:14px;line-height:1.7;color:#AAB4C2;">今晚睡前开始第一次监测。明早你会看到鼾声时长、疑似梦话片段，以及值得回听的录音。</div>
+      </div>
+      <button onClick="{{ act.startFlow }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:#8FD4C9">开始第一次监测<i class="icon-arrow-right" style="font-size:20px"></i></button>
+      <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:#7F8A9B;"><i class="icon-shield-check" style="font-size:15px"></i>录音默认仅保存在本机</div>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- PERMISSION DENIED -->
+  <sc-if value="{{ on.denied }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 0 20px;display:flex;flex-direction:column;">
+    <div style="height:64px;display:flex;align-items:center;padding:0 4px;"><button onClick="{{ act.goHome }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.06)"><i class="icon-arrow-left" style="font-size:24px"></i></button></div>
+    <div style="flex:1;padding:24px 28px;display:flex;flex-direction:column;gap:24px;">
+      <div style="width:72px;height:72px;border-radius:24px;background:rgba(232,144,127,.14);color:#E8907F;display:flex;align-items:center;justify-content:center;"><i class="icon-mic-off" style="font-size:32px"></i></div>
+      <div style="display:flex;flex-direction:column;gap:12px;"><div style="font-size:26px;font-weight:600;line-height:1.35;">没有麦克风权限，<br>暂时无法监测</div><div style="font-size:15px;line-height:1.7;color:#AAB4C2;">你之前拒绝了录音授权。眠声只在监测期间使用麦克风，声音识别在本机完成。</div></div>
+      <div style="flex:none;border-radius:20px;background:#1B2533;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
+        <span style="font-size:13px;color:#AAB4C2;">在系统设置中开启</span>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;"><span>设置</span><i class="icon-chevron-right" style="font-size:14px;color:#7F8A9B"></i><span>应用</span><i class="icon-chevron-right" style="font-size:14px;color:#7F8A9B"></i><span>眠声</span><i class="icon-chevron-right" style="font-size:14px;color:#7F8A9B"></i><span>权限</span><i class="icon-chevron-right" style="font-size:14px;color:#7F8A9B"></i><span style="color:#78C7BB;">麦克风</span></div>
+      </div>
+    </div>
+    <div style="padding:12px 24px 20px;display:flex;flex-direction:column;gap:8px;">
+      <button onClick="{{ act.gotoSettingsGrant }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:#8FD4C9">前往设置<i class="icon-external-link" style="font-size:20px"></i></button>
+      <button onClick="{{ act.goHome }}" style="width:100%;height:48px;border-radius:24px;border:none;background:transparent;color:#AAB4C2;font-size:15px;display:flex;align-items:center;padding:0 24px;cursor:pointer;" style-hover="background:rgba(255,255,255,.05)">稍后</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- PRECHECK -->
+  <sc-if value="{{ on.precheck }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 0 20px;display:flex;flex-direction:column;">
+    <div style="height:64px;display:flex;align-items:center;gap:4px;padding:0 4px;flex:none;"><button onClick="{{ act.goHome }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.06)"><i class="icon-arrow-left" style="font-size:24px"></i></button><span style="font-size:20px;font-weight:500;">开始前检查</span></div>
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:4px 20px 20px;display:flex;flex-direction:column;gap:16px;">
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:20px;display:flex;flex-direction:column;gap:16px;">
+        <div style="position:relative;height:150px;border-radius:16px;background:#151E2B;overflow:hidden;">
+          <div style="position:absolute;left:20px;top:44px;width:64px;height:70px;border-radius:10px;background:#222E3F;"></div>
+          <div style="position:absolute;left:40px;top:58px;width:22px;height:40px;border-radius:5px;border:2px solid #78C7BB;background:#101722;"></div>
+          <div style="position:absolute;left:58px;top:64px;width:5px;height:5px;border-radius:3px;background:#78C7BB;"></div>
+          <div style="position:absolute;left:66px;top:46px;width:40px;height:40px;border-radius:50%;border:1.5px solid transparent;border-right-color:rgba(120,199,187,.7);"></div>
+          <div style="position:absolute;left:56px;top:36px;width:60px;height:60px;border-radius:50%;border:1.5px solid transparent;border-right-color:rgba(120,199,187,.45);"></div>
+          <div style="position:absolute;left:46px;top:26px;width:80px;height:80px;border-radius:50%;border:1.5px solid transparent;border-right-color:rgba(120,199,187,.22);"></div>
+          <div style="position:absolute;left:150px;top:18px;right:16px;bottom:18px;border-radius:14px;background:#222E3F;"></div>
+          <div style="position:absolute;left:160px;top:34px;width:58px;height:82px;border-radius:12px;background:#2E3B50;"></div>
+          <div style="position:absolute;left:172px;top:56px;width:34px;height:34px;border-radius:17px;background:#4A5A72;"></div>
+          <div style="position:absolute;left:218px;top:30px;right:26px;bottom:30px;border-radius:10px;background:#283548;"></div>
+          <div style="position:absolute;left:92px;top:124px;width:66px;border-top:1.5px dashed #7F8A9B;"></div>
+          <div style="position:absolute;left:94px;top:128px;font-size:11px;color:#AAB4C2;">30–50 cm</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:16px;font-weight:600;">放在床头，麦克风朝向你</span><span style="font-size:13px;line-height:1.6;color:#AAB4C2;">不要压在枕头下或被被子盖住；建议连接充电器，并开启勿扰模式。</span></div>
+      </div>
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:6px 0;display:flex;flex-direction:column;">
+        <sc-for list="{{ pc.checks }}" as="c" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:14px;min-height:64px;padding:8px 20px;">
+            <div style="width:40px;height:40px;flex:none;border-radius:12px;background:#222E3F;color:#AAB4C2;display:flex;align-items:center;justify-content:center;"><i class="icon-{{ c.icon }}" style="font-size:20px"></i></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;">{{ c.title }}</span><span style="font-size:13px;color:{{ c.valColor }};">{{ c.val }}</span></div>
+            <i class="icon-{{ c.stIcon }}" style="font-size:22px;color:{{ c.stColor }};"></i>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ pc.noisy }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:20px;background:rgba(217,168,91,.12);padding:16px;display:flex;gap:12px;align-items:flex-start;"><i class="icon-triangle-alert" style="font-size:20px;color:#D9A85B;flex:none;margin-top:1px;"></i><div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:14px;font-weight:500;color:#EBC27E;">环境声音较多</span><span style="font-size:13px;line-height:1.6;color:#D8CFC0;">风扇、空调或电视声可能影响识别。可以关闭后重新检测，也可以直接继续。</span></div></div>
+      </sc-if>
+      <sc-if value="{{ pc.busy }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:20px;background:rgba(232,144,127,.12);padding:16px;display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;"><i class="icon-mic-off" style="font-size:20px;color:#E8907F;flex:none;margin-top:1px;"></i><div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:14px;font-weight:500;color:#F0AFA2;">麦克风暂不可用</span><span style="font-size:13px;line-height:1.6;color:#D8CFC0;">可能正在通话，或其他应用（录音、语音助手）占用了麦克风。结束后点击重新检测。</span></div></div>
+        </div>
+      </sc-if>
+    </div>
+    <div style="padding:12px 24px 20px;display:flex;flex-direction:column;gap:8px;border-top:1px solid #1B2533;flex:none;">
+      <sc-if value="{{ pc.canStart }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ act.startMonitor }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;opacity:{{ pc.btnOpacity }};" style-hover="background:#8FD4C9">{{ pc.startLabel }}<i class="icon-moon" style="font-size:20px"></i></button>
+      </sc-if>
+      <sc-if value="{{ pc.showRecheck }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ act.recheck }}" style="width:100%;height:48px;border-radius:24px;border:1px solid #2B3749;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:rgba(255,255,255,.05)">重新检测<i class="icon-refresh-cw" style="font-size:18px"></i></button>
+      </sc-if>
+      <sc-if value="{{ pc.busy }}" hint-placeholder-val="{{ false }}">
+        <button disabled style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;opacity:.35;">开始监测<i class="icon-moon" style="font-size:20px"></i></button>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- MONITOR -->
+  <sc-if value="{{ on.monitor }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 0 20px;display:flex;flex-direction:column;background:#05080D;opacity:{{ mon.dim }};">
+    <div style="height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;">
+      <button onClick="{{ act.goHome }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#5E6878;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.04)"><i class="icon-chevron-down" style="font-size:24px"></i></button>
+      <button onClick="{{ act.openShade }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#5E6878;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.04)"><i class="icon-bell" style="font-size:20px"></i></button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 28px 0;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 14px;border-radius:16px;background:#0E141D;font-size:14px;color:{{ mon.stateColor }};"><span style="width:6px;height:6px;border-radius:3px;background:{{ mon.stateColor }};"></span>{{ mon.stateText }}</div>
+      <div style="font-size:92px;font-weight:300;letter-spacing:-.02em;color:#B9B3A9;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:18px;">{{ mon.clock }}</div>
+      <div style="font-size:14px;color:#5E6878;">10月16日 周五</div>
+      <div style="height:250px;display:flex;align-items:center;justify-content:center;">{{ breath }}</div>
+      <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #121A24;border-bottom:1px solid #121A24;">
+        <div style="padding:16px 0;display:flex;flex-direction:column;gap:4px;"><span style="font-size:12px;color:#5E6878;">已监测</span><span style="font-size:24px;font-weight:500;color:#A39D94;font-variant-numeric:tabular-nums;">{{ mon.hms }}</span></div>
+        <div style="padding:16px 0 16px 20px;display:flex;flex-direction:column;gap:4px;border-left:1px solid #121A24;"><span style="font-size:12px;color:#5E6878;">开始时间</span><span style="font-size:24px;font-weight:500;color:#A39D94;">23:30</span></div>
+      </div>
+      <div style="font-size:13px;line-height:1.6;color:#4E5868;margin-top:14px;align-self:flex-start;">{{ mon.hint }}</div>
+    </div>
+    <div style="padding:16px 24px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <button onClick="{{ act.togglePause }}" style="height:56px;border-radius:28px;border:1px solid #1F2835;background:transparent;color:#A39D94;font-size:16px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;cursor:pointer;" style-hover="background:#0E141D">{{ mon.pauseLabel }}<i class="icon-{{ mon.pauseIcon }}" style="font-size:20px"></i></button>
+      <button onClick="{{ act.askEnd }}" style="height:56px;border-radius:28px;border:none;background:#141B26;color:#C9C3B9;font-size:16px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;cursor:pointer;" style-hover="background:#1A2330">结束监测<i class="icon-square" style="font-size:18px"></i></button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- GENERATING -->
+  <sc-if value="{{ on.generating }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 32px 20px;display:flex;flex-direction:column;justify-content:center;gap:28px;">
+    {{ spinner }}
+    <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:24px;font-weight:600;">正在生成报告</span><span style="font-size:14px;color:#AAB4C2;">识别在本机完成，通常不到半分钟</span></div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <sc-for list="{{ gen }}" as="g" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:12px;font-size:15px;color:{{ g.color }};"><i class="icon-{{ g.icon }}" style="font-size:20px"></i>{{ g.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- REPORT -->
+  <sc-if value="{{ on.report }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 0 0;display:flex;flex-direction:column;">
+    <div style="height:64px;display:flex;align-items:center;gap:4px;padding:0 4px;flex:none;"><button onClick="{{ act.reportBack }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.06)"><i class="icon-arrow-left" style="font-size:24px"></i></button><span style="font-size:20px;font-weight:500;">监测报告</span></div>
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:4px 20px 120px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;flex-direction:column;gap:4px;padding:4px 0 6px;">
+        <div style="font-size:26px;font-weight:600;">{{ r.title }}</div>
+        <div style="font-size:14px;color:#AAB4C2;">{{ r.range }} · 会话 {{ r.session }}</div>
+      </div>
+      <sc-if value="{{ r.insuff }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:16px;background:#222E3F;padding:14px 16px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.6;color:#D8D2C8;"><i class="icon-info" style="font-size:18px;color:#AAB4C2;flex:none;margin-top:1px;"></i>数据不足：有效监测少于 3 小时，鼾声占比不计算，也不计入趋势平均。</div>
+      </sc-if>
+      <div style="font-size:15px;line-height:1.75;color:#D8D2C8;text-wrap:pretty;">{{ r.overview }}</div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <span style="font-size:13px;color:#AAB4C2;">有效监测时长</span>
+        <div style="display:flex;align-items:baseline;"><span style="font-size:44px;font-weight:600;letter-spacing:-.02em;">{{ r.effH }}</span><span style="font-size:15px;color:#AAB4C2;margin:0 8px 0 4px;">小时</span><span style="font-size:44px;font-weight:600;letter-spacing:-.02em;">{{ r.effM }}</span><span style="font-size:15px;color:#AAB4C2;margin-left:4px;">分</span></div>
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;">
+          <div style="width:{{ r.effPct }};background:#78C7BB;"></div>
+          <sc-if value="{{ r.hasPause }}" hint-placeholder-val="{{ false }}"><div style="width:{{ r.pausePct }};background:repeating-linear-gradient(135deg,#5B6677 0 2px,#2B3749 2px 4px);"></div></sc-if>
+          <sc-if value="{{ r.hasGap }}" hint-placeholder-val="{{ false }}"><div style="width:{{ r.gapPct }};background:repeating-linear-gradient(90deg,#E8907F 0 3px,transparent 3px 6px);"></div></sc-if>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:#AAB4C2;">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#78C7BB;"></span>有效 {{ r.effText }}</span>
+          <sc-if value="{{ r.hasPause }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#5B6677;"></span>暂停 {{ r.pauseMin }} 分</span></sc-if>
+          <sc-if value="{{ r.hasGap }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;border:1px dashed #E8907F;"></span>录音中断 {{ r.gapMin }} 分</span></sc-if>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="flex:none;border-radius:24px;background:#1B2533;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:136px;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#AAB4C2;"><span style="width:8px;height:8px;border-radius:2px;background:#D9A85B;"></span>鼾声累计</div>
+          <sc-if value="{{ r.hasSnore }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:baseline;"><span style="font-size:36px;font-weight:600;color:#E2B56A;">{{ r.snore }}</span><span style="font-size:14px;color:#AAB4C2;margin-left:4px;">分钟</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:4px;border-radius:2px;background:#2B3749;overflow:hidden;"><div style="height:100%;width:{{ r.ratioW }};background:#D9A85B;"></div></div><span style="font-size:13px;color:#D8D2C8;">{{ r.ratioText }}</span></div>
+          </sc-if>
+          <sc-if value="{{ r.noSnore }}" hint-placeholder-val="{{ false }}"><div style="font-size:16px;line-height:1.5;font-weight:500;">未检测到明显鼾声</div></sc-if>
+        </div>
+        <div style="flex:none;border-radius:24px;background:#1B2533;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:136px;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#AAB4C2;"><span style="width:8px;height:8px;transform:rotate(45deg);background:#A99BE6;"></span>疑似梦话</div>
+          <sc-if value="{{ r.hasTalk }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:baseline;"><span style="font-size:36px;font-weight:600;color:#B7AAEC;">{{ r.talk }}</span><span style="font-size:14px;color:#AAB4C2;margin-left:4px;">段</span></div>
+            <span style="font-size:13px;color:#7F8A9B;">可在下方回听</span>
+          </sc-if>
+          <sc-if value="{{ r.noTalk }}" hint-placeholder-val="{{ false }}"><div style="font-size:16px;line-height:1.5;font-weight:500;">未检测到疑似梦话</div></sc-if>
+        </div>
+      </div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:16px;font-weight:600;">夜间声音时间轴</span><span style="font-size:12px;color:#7F8A9B;">点击事件查看</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#AAB4C2;">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#D9A85B;"></span>鼾声</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;transform:rotate(45deg);background:#A99BE6;"></span>疑似梦话</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:repeating-linear-gradient(135deg,#7F8A9B 0 2px,transparent 2px 4px);"></span>暂停</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;border:1.5px dashed #E8907F;"></span>中断</span>
+        </div>
+        <div style="position:relative;height:20px;">
+          <sc-for list="{{ r.talks }}" as="t" hint-placeholder-count="3">
+            <div onClick="{{ t.onClick }}" style="position:absolute;left:{{ t.left }};top:-10px;width:32px;height:36px;margin-left:-16px;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;">
+              <div style="width:11px;height:11px;transform:rotate(45deg);background:{{ t.color }};box-shadow:{{ t.ring }};margin-bottom:5px;"></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:relative;height:44px;border-radius:8px;background:#243044;margin-top:-10px;">
+          <sc-for list="{{ r.talks }}" as="t" hint-placeholder-count="3"><div style="position:absolute;left:{{ t.left }};top:0;bottom:0;width:1.5px;background:{{ t.color }};opacity:.55;"></div></sc-for>
+          <sc-for list="{{ r.blocks }}" as="b" hint-placeholder-count="6">
+            <div onClick="{{ b.onClick }}" style="position:absolute;left:{{ b.left }};width:{{ b.width }};top:0;bottom:0;cursor:pointer;">
+              <div style="position:absolute;left:-7px;right:-7px;top:0;bottom:0;"></div>
+              <div style="position:absolute;left:0;right:0;top:{{ b.top }};height:{{ b.h }};background:{{ b.bg }};border:{{ b.border }};border-radius:3px;box-shadow:{{ b.ring }};"></div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ r.emptyTl }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 14px;font-size:12px;color:#7F8A9B;">整晚未检测到明显的声音事件</div></sc-if>
+        </div>
+        <div style="position:relative;height:16px;">
+          <sc-for list="{{ r.ticks }}" as="k" hint-placeholder-count="4"><span style="position:absolute;left:{{ k.left }};transform:translateX(-50%);font-size:11px;color:#7F8A9B;">{{ k.label }}</span></sc-for>
+        </div>
+        <sc-if value="{{ r.hasSel }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;background:#222E3F;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="width:10px;height:10px;border-radius:2px;flex:none;background:{{ r.sel.color }};"></span>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;font-weight:500;">{{ r.sel.title }}</span><span style="font-size:12px;color:#AAB4C2;">{{ r.sel.sub }}</span></div>
+            <sc-if value="{{ r.sel.canPlay }}" hint-placeholder-val="{{ false }}"><button onClick="{{ r.sel.onPlay }}" style="height:40px;border-radius:20px;border:none;background:#78C7BB;color:#0E2B27;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;padding:0 16px;cursor:pointer;">播放<i class="icon-play" style="font-size:16px"></i></button></sc-if>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;padding-top:6px;">
+        <span style="font-size:16px;font-weight:600;">值得回听</span>
+        <sc-if value="{{ r.showReps }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ r.reps }}" as="p" hint-placeholder-count="2">
+            <div onClick="{{ p.onOpen }}" style="flex:none;border-radius:20px;background:#1B2533;padding:14px 14px 14px 14px;display:grid;grid-template-columns:48px 1fr;gap:14px;align-items:center;cursor:pointer;box-shadow:{{ p.ring }};" style-hover="background:#1F2A3A">
+              <button onClick="{{ p.onPlay }}" style="width:48px;height:48px;border-radius:24px;border:none;background:{{ p.soft }};color:{{ p.color }};display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="icon-{{ p.playIcon }}" style="font-size:20px"></i></button>
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0;">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><span style="font-size:15px;font-weight:500;">{{ p.headline }}</span><span style="font-size:13px;color:#AAB4C2;white-space:nowrap;">{{ p.clock }} · {{ p.durText }}</span></div>
+                <div style="display:flex;align-items:center;gap:2px;height:22px;"><sc-for list="{{ p.bars }}" as="v" hint-placeholder-count="30"><div style="flex:1;height:{{ v.h }};border-radius:1px;background:{{ p.color }};opacity:.7;"></div></sc-for></div>
+              </div>
+            </div>
+          </sc-for>
+          <button onClick="{{ act.openRecs }}" style="height:52px;border-radius:26px;border:1px solid #2B3749;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;cursor:pointer;" style-hover="background:rgba(255,255,255,.04)">查看全部录音 · {{ r.recCount }} 段<i class="icon-chevron-right" style="font-size:20px"></i></button>
+        </sc-if>
+        <sc-if value="{{ r.allClean }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:20px;background:#161F2C;border:1px dashed #2B3749;padding:18px;display:flex;gap:14px;align-items:flex-start;">
+            <i class="icon-archive" style="font-size:22px;color:#7F8A9B;flex:none;"></i>
+            <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:15px;font-weight:500;">{{ r.cleanReason }}</span><span style="font-size:13px;line-height:1.6;color:#AAB4C2;">统计数据和时间轴仍然保留。收藏的录音不会被自动清理。</span><button onClick="{{ act.goSettings }}" style="align-self:flex-start;height:40px;border:none;background:transparent;color:#78C7BB;font-size:14px;padding:0;cursor:pointer;">修改保留期限</button></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ r.noEvents }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:20px;background:#161F2C;padding:18px;display:flex;gap:14px;align-items:center;font-size:14px;color:#AAB4C2;"><i class="icon-moon-star" style="font-size:22px;color:#78C7BB;"></i>没有需要回听的片段</div>
+        </sc-if>
+      </div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:20px;display:flex;flex-direction:column;gap:18px;margin-top:6px;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:16px;font-weight:600;">今早感觉如何</span><span style="font-size:12px;color:#7F8A9B;">可选</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <sc-for list="{{ r.feels }}" as="f" hint-placeholder-count="3">
+              <button onClick="{{ f.onClick }}" style="height:48px;border-radius:14px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:14px;display:flex;align-items:center;justify-content:flex-start;gap:6px;padding:0 12px;cursor:pointer;"><i class="icon-{{ f.icon }}" style="font-size:17px"></i>{{ f.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:16px;font-weight:600;">生活标签</span>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="1"><span style="height:36px;display:flex;align-items:center;padding:0 14px;border-radius:10px;background:rgba(120,199,187,.14);color:#A6DED5;font-size:14px;">{{ t }}</span></sc-for>
+            <button onClick="{{ act.openTags }}" style="height:36px;display:flex;align-items:center;gap:6px;padding:0 14px;border-radius:10px;border:1px dashed #3A4658;background:transparent;color:#AAB4C2;font-size:14px;cursor:pointer;"><i class="icon-plus" style="font-size:16px"></i>{{ r.tagBtn }}</button>
+          </div>
+          <span style="font-size:12px;line-height:1.6;color:#7F8A9B;">不需要每天填写，标签会出现在趋势里帮助回顾。</span>
+        </div>
+      </div>
+      <div style="font-size:12px;line-height:1.7;color:#7F8A9B;padding:4px 2px;">基于手机麦克风的声音识别，仅供自我观察，不能用于医疗诊断。声音强弱为相对等级；同床时，部分声音可能来自他人。</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- RECORDINGS -->
+  <sc-if value="{{ on.recordings }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;padding:36px 0 0;display:flex;flex-direction:column;">
+    <div style="height:64px;display:flex;align-items:center;gap:4px;padding:0 4px;flex:none;"><button onClick="{{ act.toReport }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.06)"><i class="icon-arrow-left" style="font-size:24px"></i></button><div style="display:flex;flex-direction:column;"><span style="font-size:18px;font-weight:500;">全部录音</span><span style="font-size:12px;color:#AAB4C2;">{{ rl.sub }}</span></div></div>
+    <div style="display:flex;gap:8px;padding:4px 20px 12px;flex:none;overflow-x:auto;scrollbar-width:none;">
+      <sc-for list="{{ rl.filters }}" as="f" hint-placeholder-count="4">
+        <button onClick="{{ f.onClick }}" style="height:36px;flex:none;border-radius:10px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:14px;display:flex;align-items:center;gap:6px;padding:0 14px;cursor:pointer;">{{ f.label }}<span style="font-size:12px;opacity:.75;">{{ f.count }}</span></button>
+      </sc-for>
+    </div>
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 20px 120px;display:flex;flex-direction:column;gap:10px;">
+      <sc-for list="{{ rl.items }}" as="x" hint-placeholder-count="6">
+        <div onClick="{{ x.onOpen }}" style="border-radius:20px;background:{{ x.cardBg }};padding:12px 4px 12px 12px;display:grid;grid-template-columns:48px 1fr 48px;gap:12px;align-items:center;cursor:pointer;box-shadow:{{ x.ring }};" style-hover="background:#1F2A3A">
+          <button onClick="{{ x.onPlay }}" style="width:48px;height:48px;border-radius:24px;border:none;background:{{ x.soft }};color:{{ x.color }};display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:{{ x.op }};"><i class="icon-{{ x.playIcon }}" style="font-size:20px"></i></button>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;font-weight:600;">{{ x.clock }}</span><span style="font-size:12px;height:22px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:{{ x.soft }};color:{{ x.tagColor }};">{{ x.typeName }}</span><span style="font-size:13px;color:#AAB4C2;margin-left:auto;">{{ x.durText }}</span></div>
+            <sc-if value="{{ x.live }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:2px;height:20px;"><sc-for list="{{ x.bars }}" as="v" hint-placeholder-count="30"><div style="flex:1;height:{{ v.h }};border-radius:1px;background:{{ x.color }};opacity:.6;"></div></sc-for></div></sc-if>
+            <sc-if value="{{ x.cleaned }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#7F8A9B;">{{ x.cleanReason }}</span></sc-if>
+          </div>
+          <button onClick="{{ x.onFav }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:{{ x.favColor }};display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.05)"><i class="icon-star" style="font-size:20px"></i></button>
+        </div>
+      </sc-for>
+      <sc-if value="{{ rl.empty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 12px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
+          <div style="width:56px;height:56px;border-radius:18px;background:#1B2533;color:#7F8A9B;display:flex;align-items:center;justify-content:center;"><i class="icon-star" style="font-size:24px"></i></div>
+          <span style="font-size:17px;font-weight:500;">{{ rl.emptyTitle }}</span>
+          <span style="font-size:14px;line-height:1.6;color:#AAB4C2;">{{ rl.emptyBody }}</span>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- HISTORY -->
+  <sc-if value="{{ on.history }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;top:36px;left:0;right:0;bottom:100px;display:flex;flex-direction:column;">
+    <div style="height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 20px;flex:none;"><span style="font-size:24px;font-weight:600;">记录</span><button onClick="{{ act.openCal }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:rgba(255,255,255,.06)"><i class="icon-calendar" style="font-size:22px"></i></button></div>
+    <sc-if value="{{ home.has }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 20px 32px;display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#AAB4C2;padding-bottom:6px;">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:4px;background:#78C7BB;"></span>完整记录</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:4px;background:#E8907F;"></span>部分中断</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:4px;background:#7F8A9B;"></span>数据不足</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:4px;border:1px dashed #7F8A9B;"></span>未监测</span>
+      </div>
+      <sc-for list="{{ hist }}" as="h" hint-placeholder-count="6">
+        <sc-if value="{{ h.has }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ h.onOpen }}" style="flex:none;border-radius:20px;background:#1B2533;padding:16px 16px 16px 18px;display:grid;grid-template-columns:44px 1fr 20px;gap:14px;align-items:center;cursor:pointer;" style-hover="background:#1F2A3A">
+            <div style="display:flex;flex-direction:column;align-items:flex-start;"><span style="font-size:26px;font-weight:600;line-height:1.1;">{{ h.d }}</span><span style="font-size:12px;color:#AAB4C2;">{{ h.wk }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:14px;color:#D8D2C8;">{{ h.title }}</span><span style="font-size:12px;height:22px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:{{ h.stBg }};color:{{ h.stColor }};">{{ h.stLabel }}</span></div>
+              <div style="display:flex;gap:14px;font-size:13px;color:#AAB4C2;flex-wrap:wrap;"><span>有效 <b style="color:#F1ECE3;font-weight:600;">{{ h.eff }}</b></span><span>鼾声 <b style="color:#E2B56A;font-weight:600;">{{ h.snore }}</b></span><span>梦话 <b style="color:#B7AAEC;font-weight:600;">{{ h.talk }}</b></span></div>
+              <sc-if value="{{ h.cleaned }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#7F8A9B;display:flex;align-items:center;gap:6px;"><i class="icon-archive" style="font-size:13px"></i>录音已按设置清理</span></sc-if>
+            </div>
+            <i class="icon-chevron-right" style="font-size:18px;color:#7F8A9B;"></i>
+          </div>
+        </sc-if>
+        <sc-if value="{{ h.none }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:20px;border:1px dashed #2B3749;padding:14px 18px;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:center;">
+            <div style="display:flex;flex-direction:column;"><span style="font-size:20px;font-weight:500;color:#7F8A9B;">{{ h.d }}</span><span style="font-size:12px;color:#5E6878;">{{ h.wk }}</span></div>
+            <span style="font-size:14px;color:#7F8A9B;">当天未监测</span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+    </sc-if>
+    <sc-if value="{{ home.empty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:60px 28px;display:flex;flex-direction:column;gap:12px;"><i class="icon-calendar-days" style="font-size:32px;color:#7F8A9B;"></i><span style="font-size:18px;font-weight:500;">还没有记录</span><span style="font-size:14px;line-height:1.6;color:#AAB4C2;">完成第一次监测后，每晚的报告会按日期出现在这里。</span></div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- TRENDS -->
+  <sc-if value="{{ on.trends }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;top:36px;left:0;right:0;bottom:100px;display:flex;flex-direction:column;">
+    <div style="height:64px;display:flex;align-items:center;padding:0 20px;flex:none;"><span style="font-size:24px;font-weight:600;">趋势</span></div>
+    <sc-if value="{{ home.has }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 20px 32px;display:flex;flex-direction:column;gap:14px;">
+      <div style="flex:none;display:grid;grid-template-columns:1fr 1fr;height:44px;border-radius:22px;border:1px solid #2B3749;overflow:hidden;">
+        <button onClick="{{ act.range7 }}" style="border:none;background:{{ tr.b7 }};color:{{ tr.c7 }};font-size:14px;display:flex;align-items:center;gap:8px;padding:0 20px;cursor:pointer;"><sc-if value="{{ tr.is7 }}" hint-placeholder-val="{{ true }}"><i class="icon-check" style="font-size:16px"></i></sc-if>近 7 天</button>
+        <button onClick="{{ act.range30 }}" style="border:none;border-left:1px solid #2B3749;background:{{ tr.b30 }};color:{{ tr.c30 }};font-size:14px;display:flex;align-items:center;gap:8px;padding:0 20px;cursor:pointer;"><sc-if value="{{ tr.is30 }}" hint-placeholder-val="{{ false }}"><i class="icon-check" style="font-size:16px"></i></sc-if>近 30 天</button>
+      </div>
+      <div style="font-size:13px;color:#AAB4C2;">{{ tr.summary }}</div>
+
+      <div style="border-radius:20px;background:#222E3F;padding:14px 12px 14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;"><span style="font-size:15px;font-weight:600;">{{ tr.sel.title }}</span><span style="font-size:13px;color:#AAB4C2;">{{ tr.sel.sub }}</span></div>
+        <sc-if value="{{ tr.sel.canOpen }}" hint-placeholder-val="{{ true }}"><button onClick="{{ tr.sel.onOpen }}" style="height:40px;border-radius:20px;border:1px solid #3A4658;background:transparent;color:#78C7BB;font-size:14px;display:flex;align-items:center;gap:4px;padding:0 10px 0 14px;cursor:pointer;">查看报告<i class="icon-chevron-right" style="font-size:16px"></i></button></sc-if>
+      </div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:18px 16px 14px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:15px;font-weight:600;">鼾声累计时长</span><span style="font-size:12px;color:#7F8A9B;">单位：分钟</span></div>
+        <div style="display:grid;grid-template-columns:24px 1fr;gap:6px;">
+          <div style="position:relative;height:140px;font-size:10px;color:#7F8A9B;"><span style="position:absolute;top:-6px;">60</span><span style="position:absolute;top:64px;">30</span><span style="position:absolute;bottom:-6px;">0</span></div>
+          <div style="position:relative;height:140px;">
+            <div style="position:absolute;left:0;right:0;top:0;border-top:1px dashed #2B3749;"></div><div style="position:absolute;left:0;right:0;top:70px;border-top:1px dashed #2B3749;"></div><div style="position:absolute;left:0;right:0;bottom:0;border-top:1px solid #3A4658;"></div>
+            <div style="position:absolute;inset:0;display:flex;gap:{{ tr.gap }};">
+              <sc-for list="{{ tr.days }}" as="d" hint-placeholder-count="7">
+                <div onClick="{{ d.onSel }}" style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;border-radius:6px;background:{{ d.selBg }};cursor:pointer;position:relative;">
+                  <div style="width:{{ tr.barW }};height:{{ d.snoreH }};background:{{ d.snoreC }};border-radius:3px 3px 1px 1px;"></div>
+                  <sc-if value="{{ d.none }}" hint-placeholder-val="{{ false }}"><div style="width:{{ tr.barW }};height:2px;background:#3A4658;margin-bottom:3px;"></div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:24px 1fr;gap:6px;"><span></span><div style="display:flex;gap:{{ tr.gap }};"><sc-for list="{{ tr.days }}" as="d" hint-placeholder-count="7"><span style="flex:1;font-size:10px;color:{{ d.labelC }};text-align:center;white-space:nowrap;">{{ d.label }}</span></sc-for></div></div>
+      </div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:18px 16px 14px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:15px;font-weight:600;">鼾声占比</span><span style="font-size:12px;color:#7F8A9B;">鼾声 ÷ 有效监测时长</span></div>
+        <div style="display:grid;grid-template-columns:24px 1fr;gap:6px;">
+          <div style="position:relative;height:120px;font-size:10px;color:#7F8A9B;"><span style="position:absolute;top:-6px;">16%</span><span style="position:absolute;top:54px;">8%</span><span style="position:absolute;bottom:-6px;">0</span></div>
+          <div style="position:relative;height:120px;">
+            <div style="position:absolute;left:0;right:0;top:0;border-top:1px dashed #2B3749;"></div><div style="position:absolute;left:0;right:0;top:60px;border-top:1px dashed #2B3749;"></div><div style="position:absolute;left:0;right:0;bottom:0;border-top:1px solid #3A4658;"></div>
+            <svg viewBox="0 0 100 120" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;"><path d="{{ tr.ratioPath }}" fill="none" stroke="#D9A85B" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path></svg>
+            <div style="position:absolute;inset:0;display:flex;gap:{{ tr.gap }};">
+              <sc-for list="{{ tr.days }}" as="d" hint-placeholder-count="7">
+                <div onClick="{{ d.onSel }}" style="flex:1;height:100%;position:relative;border-radius:6px;background:{{ d.selBg }};cursor:pointer;">
+                  <sc-if value="{{ d.hasRatio }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:50%;bottom:{{ d.ratioB }};width:{{ d.dot }};height:{{ d.dot }};transform:translate(-50%,50%);border-radius:50%;background:#101722;border:2px solid #D9A85B;"></div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:24px 1fr;gap:6px;"><span></span><div style="display:flex;gap:{{ tr.gap }};"><sc-for list="{{ tr.days }}" as="d" hint-placeholder-count="7"><span style="flex:1;font-size:10px;color:{{ d.labelC }};text-align:center;white-space:nowrap;">{{ d.label }}</span></sc-for></div></div>
+      </div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:18px 16px 14px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:15px;font-weight:600;">疑似梦话</span><span style="font-size:12px;color:#7F8A9B;">单位：段</span></div>
+        <div style="display:grid;grid-template-columns:24px 1fr;gap:6px;">
+          <div style="position:relative;height:80px;font-size:10px;color:#7F8A9B;"><span style="position:absolute;top:-6px;">4</span><span style="position:absolute;top:34px;">2</span><span style="position:absolute;bottom:-6px;">0</span></div>
+          <div style="position:relative;height:80px;">
+            <div style="position:absolute;left:0;right:0;top:0;border-top:1px dashed #2B3749;"></div><div style="position:absolute;left:0;right:0;top:40px;border-top:1px dashed #2B3749;"></div><div style="position:absolute;left:0;right:0;bottom:0;border-top:1px solid #3A4658;"></div>
+            <div style="position:absolute;inset:0;display:flex;gap:{{ tr.gap }};">
+              <sc-for list="{{ tr.days }}" as="d" hint-placeholder-count="7">
+                <div onClick="{{ d.onSel }}" style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;border-radius:6px;background:{{ d.selBg }};cursor:pointer;">
+                  <div style="width:{{ tr.barW }};height:{{ d.talkH }};background:#A99BE6;border-radius:3px 3px 1px 1px;"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:24px 1fr;gap:6px;"><span></span><div style="display:flex;gap:{{ tr.gap }};"><sc-for list="{{ tr.days }}" as="d" hint-placeholder-count="7"><span style="flex:1;font-size:10px;color:{{ d.labelC }};text-align:center;white-space:nowrap;">{{ d.label }}</span></sc-for></div></div>
+      </div>
+
+      <div style="flex:none;border-radius:24px;background:#1B2533;padding:18px 18px;display:flex;flex-direction:column;gap:14px;">
+        <span style="font-size:15px;font-weight:600;">生活标签回顾</span>
+        <sc-for list="{{ tr.tagRows }}" as="g" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:#A6DED5;">{{ g.tag }} · {{ g.n }} 晚</span><span style="color:#AAB4C2;font-size:13px;">平均鼾声</span></div>
+            <div style="display:grid;grid-template-columns:52px 1fr 44px;gap:8px;align-items:center;font-size:12px;color:#AAB4C2;"><span>有标签</span><div style="height:6px;border-radius:3px;background:#243044;"><div style="height:100%;width:{{ g.wW }};border-radius:3px;background:#D9A85B;"></div></div><span style="text-align:right;color:#F1ECE3;">{{ g.w }} 分</span></div>
+            <div style="display:grid;grid-template-columns:52px 1fr 44px;gap:8px;align-items:center;font-size:12px;color:#AAB4C2;"><span>其他夜晚</span><div style="height:6px;border-radius:3px;background:#243044;"><div style="height:100%;width:{{ g.oW }};border-radius:3px;background:#6B7585;"></div></div><span style="text-align:right;color:#F1ECE3;">{{ g.o }} 分</span></div>
+          </div>
+        </sc-for>
+        <span style="font-size:12px;line-height:1.6;color:#7F8A9B;">这是记录中观察到的差异，样本较少，不代表标签与鼾声之间存在因果关系。</span>
+      </div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ home.empty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:60px 28px;display:flex;flex-direction:column;gap:12px;"><i class="icon-chart-column" style="font-size:32px;color:#7F8A9B;"></i><span style="font-size:18px;font-weight:500;">暂无趋势</span><span style="font-size:14px;line-height:1.6;color:#AAB4C2;">累计监测 3 晚后，这里会显示鼾声与疑似梦话的变化。</span></div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- SETTINGS -->
+  <sc-if value="{{ on.settings }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;top:36px;left:0;right:0;bottom:100px;overflow-y:auto;scrollbar-width:none;padding:0 20px 32px;display:flex;flex-direction:column;gap:12px;">
+    <div style="height:64px;display:flex;align-items:center;flex:none;"><span style="font-size:24px;font-weight:600;">设置</span></div>
+    <span style="font-size:13px;color:#78C7BB;padding:4px 4px 0;">录音与存储</span>
+    <div style="flex:none;border-radius:24px;background:#1B2533;display:flex;flex-direction:column;">
+      <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid #243044;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:15px;">当前录音占用</span><div style="display:flex;align-items:baseline;"><span style="font-size:22px;font-weight:600;">{{ st.mb }}</span><span style="font-size:13px;color:#AAB4C2;margin-left:4px;">MB</span></div></div>
+        <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;background:#243044;"><div style="width:{{ st.favW }};background:#D9A85B;"></div><div style="width:{{ st.otherW }};background:#78C7BB;"></div></div>
+        <div style="display:flex;gap:14px;font-size:12px;color:#AAB4C2;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#D9A85B;"></span>收藏 {{ st.favMb }} MB</span><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#78C7BB;"></span>其他 {{ st.otherMb }} MB</span></div>
+      </div>
+      <button onClick="{{ act.openRet }}" style="min-height:64px;border:none;border-bottom:1px solid #243044;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:space-between;padding:0 16px 0 20px;cursor:pointer;text-align:left;" style-hover="background:rgba(255,255,255,.03)"><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;">录音保留期限</span><span style="font-size:13px;color:#AAB4C2;">{{ st.retLabel }}</span></div><i class="icon-chevron-right" style="font-size:18px;color:#7F8A9B"></i></button>
+      <button onClick="{{ act.askClearUnfav }}" style="min-height:64px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:space-between;padding:0 16px 0 20px;cursor:pointer;text-align:left;border-radius:0 0 24px 24px;" style-hover="background:rgba(255,255,255,.03)"><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;">清理未收藏录音</span><span style="font-size:13px;color:#AAB4C2;">统计数据会保留</span></div><i class="icon-chevron-right" style="font-size:18px;color:#7F8A9B"></i></button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:2px 6px 8px;font-size:12px;line-height:1.6;color:#AAB4C2;"><i class="icon-shield-check" style="font-size:16px;color:#78C7BB;flex:none;margin-top:1px;"></i>录音默认仅保存在本机，不会上传。收藏的录音受保护，不会被自动清理。</div>
+    <span style="font-size:13px;color:#78C7BB;padding:4px 4px 0;">权限与通知</span>
+    <div style="flex:none;border-radius:24px;background:#1B2533;display:flex;flex-direction:column;">
+      <button onClick="{{ act.micSetting }}" style="min-height:64px;border:none;border-bottom:1px solid #243044;background:transparent;color:#F1ECE3;display:flex;align-items:center;gap:14px;padding:0 16px 0 20px;cursor:pointer;text-align:left;border-radius:24px 24px 0 0;" style-hover="background:rgba(255,255,255,.03)"><i class="icon-mic" style="font-size:20px;color:#AAB4C2"></i><span style="flex:1;font-size:15px;">麦克风权限</span><span style="font-size:13px;color:{{ st.micColor }};">{{ st.micLabel }}</span><i class="icon-chevron-right" style="font-size:18px;color:#7F8A9B"></i></button>
+      <button onClick="{{ act.notifSetting }}" style="min-height:64px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;gap:14px;padding:0 16px 0 20px;cursor:pointer;text-align:left;border-radius:0 0 24px 24px;" style-hover="background:rgba(255,255,255,.03)"><i class="icon-bell" style="font-size:20px;color:#AAB4C2"></i><span style="flex:1;font-size:15px;">通知设置</span><i class="icon-chevron-right" style="font-size:18px;color:#7F8A9B"></i></button>
+    </div>
+    <span style="font-size:13px;color:#78C7BB;padding:4px 4px 0;">帮助</span>
+    <div style="flex:none;border-radius:24px;background:#1B2533;display:flex;flex-direction:column;">
+      <button onClick="{{ act.help }}" style="min-height:64px;border:none;border-bottom:1px solid #243044;background:transparent;color:#F1ECE3;display:flex;align-items:center;gap:14px;padding:0 16px 0 20px;cursor:pointer;text-align:left;border-radius:24px 24px 0 0;" style-hover="background:rgba(255,255,255,.03)"><i class="icon-book-open" style="font-size:20px;color:#AAB4C2"></i><span style="flex:1;font-size:15px;">使用说明</span><i class="icon-chevron-right" style="font-size:18px;color:#7F8A9B"></i></button>
+      <button onClick="{{ act.askClearAll }}" style="min-height:64px;border:none;background:transparent;color:#E8907F;display:flex;align-items:center;gap:14px;padding:0 16px 0 20px;cursor:pointer;text-align:left;border-radius:0 0 24px 24px;" style-hover="background:rgba(232,144,127,.06)"><i class="icon-trash-2" style="font-size:20px"></i><span style="flex:1;font-size:15px;">清除全部数据</span></button>
+    </div>
+    <span style="font-size:12px;color:#5E6878;padding:8px 4px;">眠声 1.0.0</span>
+  </div>
+  </sc-if>
+
+  <!-- BOTTOM NAV -->
+  <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;height:100px;padding-bottom:20px;background:#151E2B;display:flex;z-index:20;">
+    <sc-for list="{{ nav }}" as="t" hint-placeholder-count="4">
+      <button onClick="{{ t.onClick }}" style="flex:1;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:{{ t.color }};">
+        <span style="width:64px;height:32px;border-radius:16px;background:{{ t.pill }};display:flex;align-items:center;justify-content:center;"><i class="icon-{{ t.icon }}" style="font-size:22px"></i></span>
+        <span style="font-size:12px;font-weight:{{ t.weight }};">{{ t.label }}</span>
+      </button>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <!-- MINI PLAYER -->
+  <sc-if value="{{ pl.mini }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ act.expandPlayer }}" style="position:absolute;left:12px;right:12px;bottom:{{ pl.miniBottom }};height:64px;border-radius:20px;background:#253247;box-shadow:0 8px 24px rgba(0,0,0,.35);display:flex;align-items:center;gap:12px;padding:0 6px 0 16px;cursor:pointer;z-index:40;overflow:hidden;">
+    <div style="position:absolute;left:0;top:0;height:2px;width:{{ pl.pct }};background:{{ pl.color }};"></div>
+    <span style="width:10px;height:10px;border-radius:2px;background:{{ pl.color }};flex:none;"></span>
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0;"><span style="font-size:14px;font-weight:500;">{{ pl.typeName }} · {{ pl.clock }}</span><span style="font-size:12px;color:#AAB4C2;">{{ pl.posText }} / {{ pl.totText }}</span></div>
+    <button onClick="{{ act.playToggleStop }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="icon-{{ pl.playIcon }}" style="font-size:22px"></i></button>
+    <button onClick="{{ act.closePlayer }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:#AAB4C2;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="icon-x" style="font-size:20px"></i></button>
+  </div>
+  </sc-if>
+
+  <!-- SCRIM -->
+  <sc-if value="{{ scrim }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ act.closeSheet }}" style="position:absolute;inset:0;background:rgba(3,6,10,.62);z-index:50;animation:msFade .2s ease;"></div>
+  </sc-if>
+
+  <!-- FULL PLAYER -->
+  <sc-if value="{{ pl.full }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:55;border-radius:28px 28px 0 0;background:#1C2738;padding:10px 20px 32px;display:flex;flex-direction:column;gap:18px;animation:msUp .25s ease;">
+    <button onClick="{{ act.collapsePlayer }}" style="align-self:center;width:64px;height:24px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="width:32px;height:4px;border-radius:2px;background:#4A5568;"></span></button>
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:{{ pl.soft }};color:{{ pl.tagColor }};">{{ pl.typeName }}</span><span style="font-size:13px;color:#AAB4C2;">{{ pl.idxText }}</span></div>
+        <span style="font-size:22px;font-weight:600;">{{ pl.clock }}</span>
+        <span style="font-size:13px;color:#AAB4C2;">{{ pl.meta }}</span>
+      </div>
+      <button onClick="{{ act.collapsePlayer }}" style="width:48px;height:48px;border-radius:24px;border:none;background:#243044;color:#F1ECE3;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="icon-chevron-down" style="font-size:22px"></i></button>
+    </div>
+    <div onClick="{{ act.seek }}" style="position:relative;height:96px;display:flex;align-items:center;gap:2px;cursor:pointer;">
+      <sc-for list="{{ pl.bars }}" as="v" hint-placeholder-count="56"><div style="flex:1;height:{{ v.h }};border-radius:2px;background:{{ v.c }};"></div></sc-for>
+      <div style="position:absolute;top:0;bottom:0;left:{{ pl.pct }};width:2px;background:#F1ECE3;border-radius:1px;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#AAB4C2;font-variant-numeric:tabular-nums;margin-top:-8px;"><span>{{ pl.posText }}</span><span>{{ pl.totText }}</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <button onClick="{{ act.prevRec }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:{{ pl.prevColor }};display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="icon-skip-back" style="font-size:22px"></i></button>
+      <button onClick="{{ act.back10 }}" style="width:52px;height:52px;border-radius:26px;border:none;background:transparent;color:#F1ECE3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:1px;"><i class="icon-rotate-ccw" style="font-size:22px"></i><span style="font-size:9px;">10s</span></button>
+      <button onClick="{{ act.playToggle }}" style="width:72px;height:72px;border-radius:36px;border:none;background:#78C7BB;color:#0E2B27;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#8FD4C9"><i class="icon-{{ pl.playIcon }}" style="font-size:30px"></i></button>
+      <button onClick="{{ act.fwd10 }}" style="width:52px;height:52px;border-radius:26px;border:none;background:transparent;color:#F1ECE3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:1px;"><i class="icon-rotate-cw" style="font-size:22px"></i><span style="font-size:9px;">10s</span></button>
+      <button onClick="{{ act.nextRec }}" style="width:48px;height:48px;border-radius:24px;border:none;background:transparent;color:{{ pl.nextColor }};display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="icon-skip-forward" style="font-size:22px"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <button onClick="{{ act.favCur }}" style="height:48px;border-radius:14px;border:none;background:#243044;color:{{ pl.favColor }};font-size:14px;display:flex;align-items:center;gap:8px;padding:0 14px;cursor:pointer;" style-hover="background:#2A374B"><i class="icon-star" style="font-size:18px"></i>{{ pl.favLabel }}</button>
+      <button onClick="{{ act.openCorrect }}" style="height:48px;border-radius:14px;border:none;background:#243044;color:#F1ECE3;font-size:14px;display:flex;align-items:center;gap:8px;padding:0 14px;cursor:pointer;" style-hover="background:#2A374B"><i class="icon-flag" style="font-size:18px"></i>识别有误</button>
+      <button onClick="{{ act.openMore }}" style="height:48px;border-radius:14px;border:none;background:#243044;color:#F1ECE3;font-size:14px;display:flex;align-items:center;gap:8px;padding:0 14px;cursor:pointer;" style-hover="background:#2A374B"><i class="icon-ellipsis" style="font-size:18px"></i>更多</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- SHEETS -->
+  <sc-if value="{{ sh.perm }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 24px 32px;display:flex;flex-direction:column;gap:20px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;"></span>
+    <div style="width:56px;height:56px;border-radius:18px;background:rgba(120,199,187,.16);color:#78C7BB;display:flex;align-items:center;justify-content:center;"><i class="icon-mic" style="font-size:26px"></i></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:22px;font-weight:600;">需要使用麦克风</span><span style="font-size:14px;line-height:1.6;color:#AAB4C2;">用于在夜间识别鼾声和疑似梦话。</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:1.5;color:#D8D2C8;">
+      <div style="display:flex;gap:12px;"><i class="icon-check" style="font-size:18px;color:#78C7BB;flex:none;"></i>只在你开始监测后录音，结束即停止</div>
+      <div style="display:flex;gap:12px;"><i class="icon-check" style="font-size:18px;color:#78C7BB;flex:none;"></i>识别在本机完成，录音默认保存在本机</div>
+      <div style="display:flex;gap:12px;"><i class="icon-check" style="font-size:18px;color:#78C7BB;flex:none;"></i>可以随时在设置中删除录音</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onClick="{{ act.permContinue }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;" style-hover="background:#8FD4C9">继续并授权<i class="icon-arrow-right" style="font-size:20px"></i></button>
+      <button onClick="{{ act.permLater }}" style="width:100%;height:48px;border-radius:24px;border:none;background:transparent;color:#AAB4C2;font-size:15px;display:flex;align-items:center;padding:0 24px;cursor:pointer;" style-hover="background:rgba(255,255,255,.05)">稍后</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.sysperm }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:28px;right:28px;top:260px;z-index:60;border-radius:28px;background:#2A3342;padding:24px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:14px;animation:msFade .2s ease;">
+    <i class="icon-mic" style="font-size:24px;color:#A6DED5;"></i>
+    <span style="font-size:18px;text-align:center;line-height:1.5;padding:0 16px;">要允许「眠声」录制音频吗？</span>
+    <div style="width:100%;display:flex;flex-direction:column;gap:4px;padding-top:6px;">
+      <button onClick="{{ act.sysAllow }}" style="height:52px;border-radius:20px;border:none;background:#36404F;color:#A6DED5;font-size:15px;cursor:pointer;">使用应用时允许</button>
+      <button onClick="{{ act.sysAllow }}" style="height:52px;border-radius:20px;border:none;background:#36404F;color:#A6DED5;font-size:15px;cursor:pointer;">仅限这一次</button>
+      <button onClick="{{ act.sysDeny }}" style="height:52px;border-radius:20px;border:none;background:#36404F;color:#A6DED5;font-size:15px;cursor:pointer;">不允许</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.end }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#111824;padding:12px 24px 32px;display:flex;flex-direction:column;gap:18px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#2B3749;"></span>
+    <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:22px;font-weight:600;color:#D8D2C8;">结束今晚的监测？</span><span style="font-size:14px;line-height:1.6;color:#8A94A3;">已监测 {{ mon.elapsedText }}。结束后会立即生成报告。</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onClick="{{ act.endAndReport }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#5FA79C;color:#0B2420;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;">结束并查看报告<i class="icon-arrow-right" style="font-size:20px"></i></button>
+      <button onClick="{{ act.closeSheet }}" style="width:100%;height:56px;border-radius:28px;border:1px solid #243044;background:transparent;color:#C9C3B9;font-size:16px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;">继续监测<i class="icon-moon" style="font-size:18px"></i></button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.tags }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 24px 32px;display:flex;flex-direction:column;gap:18px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;"></span>
+    <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:20px;font-weight:600;">添加生活标签</span><span style="font-size:13px;color:#AAB4C2;">{{ r.title }} · 可多选</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <sc-for list="{{ tagOpts }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.onClick }}" style="height:44px;border-radius:12px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-size:15px;display:flex;align-items:center;gap:6px;padding:0 16px;cursor:pointer;"><sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><i class="icon-check" style="font-size:16px"></i></sc-if>{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:13px;color:#AAB4C2;">自定义备注</span><input value="{{ noteVal }}" onChange="{{ act.noteChange }}" placeholder="例如：晚上喝了咖啡" style="height:52px;border-radius:14px;border:1px solid #2B3749;background:#151E2B;color:#F1ECE3;font-size:15px;padding:0 16px;outline:none;"></div>
+    <button onClick="{{ act.saveTags }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;">完成<i class="icon-check" style="font-size:20px"></i></button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.correct }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 24px 32px;display:flex;flex-direction:column;gap:14px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;"></span>
+    <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:20px;font-weight:600;">这段声音是？</span><span style="font-size:13px;color:#AAB4C2;">{{ pl.typeName }} · {{ pl.clock }}。修正后报告统计会同步更新。</span></div>
+    <div style="display:flex;flex-direction:column;">
+      <sc-for list="{{ corrOpts }}" as="o" hint-placeholder-count="5">
+        <button onClick="{{ o.onClick }}" style="min-height:52px;border:none;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;gap:14px;padding:0 4px;cursor:pointer;text-align:left;border-radius:12px;" style-hover="background:rgba(255,255,255,.04)"><span style="width:20px;height:20px;border-radius:10px;border:2px solid {{ o.ringC }};display:flex;align-items:center;justify-content:center;"><span style="width:10px;height:10px;border-radius:5px;background:{{ o.dotC }};"></span></span>{{ o.label }}</button>
+      </sc-for>
+    </div>
+    <button onClick="{{ act.submitCorrect }}" style="width:100%;height:56px;border-radius:28px;border:none;background:#78C7BB;color:#0E2B27;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;padding:0 24px;cursor:pointer;opacity:{{ corrOp }};">提交修正<i class="icon-check" style="font-size:20px"></i></button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.more }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 12px 28px;display:flex;flex-direction:column;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;margin-bottom:12px;"></span>
+    <button onClick="{{ act.openCorrect }}" style="height:56px;border:none;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;gap:16px;padding:0 16px;cursor:pointer;border-radius:14px;" style-hover="background:rgba(255,255,255,.04)"><i class="icon-flag" style="font-size:20px;color:#AAB4C2"></i>修正类型</button>
+    <button onClick="{{ act.share }}" style="height:56px;border:none;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;gap:16px;padding:0 16px;cursor:pointer;border-radius:14px;" style-hover="background:rgba(255,255,255,.04)"><i class="icon-share-2" style="font-size:20px;color:#AAB4C2"></i>分享这段录音</button>
+    <button onClick="{{ act.askDelete }}" style="height:56px;border:none;background:transparent;color:#E8907F;font-size:15px;display:flex;align-items:center;gap:16px;padding:0 16px;cursor:pointer;border-radius:14px;" style-hover="background:rgba(232,144,127,.06)"><i class="icon-trash-2" style="font-size:20px"></i>删除</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.confirm }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 24px 32px;display:flex;flex-direction:column;gap:18px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;"></span>
+    <div style="width:48px;height:48px;border-radius:16px;background:rgba(232,144,127,.14);color:#E8907F;display:flex;align-items:center;justify-content:center;"><i class="icon-trash-2" style="font-size:22px"></i></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:20px;font-weight:600;">{{ cf.title }}</span><span style="font-size:14px;line-height:1.65;color:#AAB4C2;">{{ cf.body }}</span></div>
+    <div style="border-radius:14px;background:#151E2B;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.5;">
+      <div style="display:flex;gap:10px;color:#F0AFA2;"><i class="icon-x" style="font-size:16px;flex:none;"></i>{{ cf.lose }}</div>
+      <div style="display:flex;gap:10px;color:#A6DED5;"><i class="icon-check" style="font-size:16px;flex:none;"></i>{{ cf.keep }}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button onClick="{{ act.closeSheet }}" style="height:52px;border-radius:26px;border:1px solid #2B3749;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;padding:0 20px;cursor:pointer;">取消</button>
+      <button onClick="{{ cf.onOk }}" style="height:52px;border-radius:26px;border:none;background:#E8907F;color:#2B0F0A;font-size:15px;font-weight:600;display:flex;align-items:center;padding:0 20px;cursor:pointer;">{{ cf.ok }}</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.ret }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 24px 32px;display:flex;flex-direction:column;gap:14px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;"></span>
+    <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:20px;font-weight:600;">录音保留期限</span><span style="font-size:13px;line-height:1.6;color:#AAB4C2;">到期的未收藏录音会被自动清理，报告统计保留。</span></div>
+    <div style="display:flex;flex-direction:column;">
+      <sc-for list="{{ retOpts }}" as="o" hint-placeholder-count="3">
+        <button onClick="{{ o.onClick }}" style="min-height:56px;border:none;background:transparent;color:#F1ECE3;font-size:15px;display:flex;align-items:center;gap:14px;padding:0 4px;cursor:pointer;text-align:left;border-radius:12px;" style-hover="background:rgba(255,255,255,.04)"><span style="width:20px;height:20px;border-radius:10px;border:2px solid {{ o.ringC }};display:flex;align-items:center;justify-content:center;flex:none;"><span style="width:10px;height:10px;border-radius:5px;background:{{ o.dotC }};"></span></span><span style="display:flex;flex-direction:column;gap:2px;"><span>{{ o.label }}</span><span style="font-size:12px;color:#7F8A9B;">{{ o.sub }}</span></span></button>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sh.cal }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:60;border-radius:28px 28px 0 0;background:#1C2738;padding:12px 20px 32px;display:flex;flex-direction:column;gap:14px;animation:msUp .25s ease;">
+    <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#4A5568;"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:20px;font-weight:600;">2026 年 10 月</span><span style="font-size:12px;color:#7F8A9B;">点击日期查看报告</span></div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+      <sc-for list="{{ calHead }}" as="w" hint-placeholder-count="7"><span style="height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#7F8A9B;">{{ w }}</span></sc-for>
+      <sc-for list="{{ cal }}" as="c" hint-placeholder-count="35">
+        <button onClick="{{ c.onClick }}" style="height:48px;border-radius:14px;border:{{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:{{ c.cursor }};padding:0;">{{ c.d }}<span style="width:5px;height:5px;border-radius:3px;background:{{ c.dot }};"></span></button>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- NOTIFICATION SHADE -->
+  <sc-if value="{{ shade }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ act.closeShade }}" style="position:absolute;inset:0;z-index:80;background:rgba(3,5,9,.78);animation:msFade .2s ease;">
+    <div onClick="{{ act.stop }}" style="background:#161E2A;border-radius:0 0 28px 28px;padding:48px 16px 20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:baseline;gap:12px;padding:0 8px;"><span style="font-size:40px;font-weight:300;color:#C9C3B9;">{{ mon.clock }}</span><span style="font-size:14px;color:#7F8A9B;">10月16日 周五</span></div>
+      <div style="border-radius:24px;background:#222C3B;padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div onClick="{{ act.shadeOpen }}" style="display:flex;flex-direction:column;gap:10px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#AAB4C2;"><span style="width:20px;height:20px;border-radius:10px;background:#78C7BB;color:#0E2B27;display:flex;align-items:center;justify-content:center;"><i class="icon-moon" style="font-size:12px"></i></span>眠声 · 持续运行<i class="icon-mic" style="font-size:13px;color:#78C7BB;margin-left:auto;"></i></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding-left:28px;"><span style="font-size:15px;font-weight:500;">{{ mon.notifTitle }}</span><span style="font-size:13px;color:#AAB4C2;">开始于 23:30 · 已监测 {{ mon.hms }}</span></div>
+        </div>
+        <div style="display:flex;gap:8px;padding-left:20px;">
+          <button onClick="{{ act.togglePause }}" style="height:40px;border-radius:20px;border:none;background:transparent;color:#A6DED5;font-size:14px;padding:0 12px;cursor:pointer;">{{ mon.pauseLabel }}</button>
+          <button onClick="{{ act.shadeEnd }}" style="height:40px;border-radius:20px;border:none;background:transparent;color:#A6DED5;font-size:14px;padding:0 12px;cursor:pointer;">结束监测</button>
+        </div>
+      </div>
+      <span style="font-size:12px;color:#5E6878;padding:0 8px;">持续通知在监测期间不可滑动清除；点击通知返回监测页。</span>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- SNACKBAR -->
+  <sc-if value="{{ snack.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:12px;right:12px;bottom:{{ snack.bottom }};z-index:90;min-height:48px;border-radius:12px;background:#E9E4DA;color:#1B2533;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 16px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.35);animation:msUp .2s ease;">
+    <span style="flex:1;line-height:1.4;">{{ snack.text }}</span>
+    <sc-if value="{{ snack.hasUndo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ snack.undo }}" style="height:40px;border-radius:20px;border:none;background:transparent;color:#2F7D72;font-size:14px;font-weight:600;padding:0 12px;cursor:pointer;">撤销</button></sc-if>
+  </div>
+  </sc-if>
+
+  <div style="position:absolute;left:50%;bottom:7px;width:108px;height:4px;margin-left:-54px;border-radius:2px;background:#F1ECE3;opacity:{{ sb.gesture }};z-index:95;pointer-events:none;"></div>
+</div>
+</div>
+
+<sc-if value="{{ showPanels }}" hint-placeholder-val="{{ true }}">
+<div style="width:320px;display:flex;flex-direction:column;gap:24px;">
+  <div style="font-size:12px;letter-spacing:.08em;color:#7F8A9B;">设计规范</div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <span style="font-size:14px;font-weight:600;">颜色</span>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <sc-for list="{{ swatches }}" as="w" hint-placeholder-count="10">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="width:28px;height:28px;border-radius:8px;background:{{ w.c }};border:1px solid #2B3749;flex:none;"></span><span style="display:flex;flex-direction:column;"><span style="font-size:12px;">{{ w.n }}</span><span style="font-size:11px;color:#7F8A9B;">{{ w.c }}</span></span></div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <span style="font-size:14px;font-weight:600;">字体</span>
+    <span style="font-size:12px;color:#AAB4C2;line-height:1.6;">Archivo（数字 / 拉丁）+ Noto Sans SC（中文）。数字 600，单位 400 并降为次要色。</span>
+    <div style="display:flex;flex-direction:column;gap:6px;border-radius:16px;background:#121A26;padding:14px;">
+      <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:11px;color:#7F8A9B;width:56px;">数据 44</span><span style="font-size:30px;font-weight:600;">42</span><span style="font-size:12px;color:#AAB4C2;">分钟</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:11px;color:#7F8A9B;width:56px;">标题 26/22</span><span style="font-size:20px;font-weight:600;">10月16日 夜间</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:11px;color:#7F8A9B;width:56px;">卡片 16</span><span style="font-size:16px;font-weight:600;">夜间声音时间轴</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:11px;color:#7F8A9B;width:56px;">正文 15/14</span><span style="font-size:14px;color:#D8D2C8;">有效监测 7 小时</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:11px;color:#7F8A9B;width:56px;">辅助 12</span><span style="font-size:12px;color:#AAB4C2;">相对强度 · 中</span></div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <span style="font-size:14px;font-weight:600;">间距 · 圆角 · 图标</span>
+    <div style="font-size:12px;line-height:1.8;color:#AAB4C2;">间距 4 / 8 / 12 / 16 / 20 / 24 / 32 dp，页面边距 20。<br>圆角 标签 6–10 · 按钮 14 / 全圆 · 卡片 20–24 · 底部面板 28。<br>图标 Lucide 线性，20–24 dp；点击区域 ≥ 48 dp。<br>按钮文字左对齐，图标置右。</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <span style="font-size:14px;font-weight:600;">声音标签</span>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:12px;height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:rgba(217,168,91,.15);color:#E2B56A;">鼾声</span>
+      <span style="font-size:12px;height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:rgba(169,155,230,.16);color:#B7AAEC;">疑似梦话</span>
+      <span style="font-size:12px;height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:#243044;color:#AAB4C2;">已修正：电视或音乐</span>
+      <span style="font-size:12px;height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:rgba(232,144,127,.14);color:#EDA99B;">部分中断</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <span style="font-size:14px;font-weight:600;">文案边界</span>
+    <div style="font-size:12px;line-height:1.8;color:#AAB4C2;">「有效监测时长」而非睡眠时长 · 「疑似梦话」 · 「未检测到明显鼾声」 · 强度仅用轻 / 中 / 强 · 无睡眠分期与评分 · 趋势只描述观察，不做因果判断。</div>
+  </div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showPanels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;原型&quot;},&quot;monitorSpeed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1×&quot;,&quot;60×&quot;],&quot;default&quot;:&quot;60×&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;原型&quot;},&quot;monitorDim&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.4,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;夜间模式&quot;}}">
+const pad=n=>String(n).padStart(2,'0');
+const clk=m=>{m=((Math.floor(m)%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60);};
+const WK=['周日','周一','周二','周三','周四','周五','周六'];
+const LV=['','轻','中','强'];
+function rng(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return()=>{h=(Math.imul(h,1664525)+1013904223)>>>0;return h/4294967296;};}
+const TODAY=new Date(2026,9,17);
+const DEF={
+ '10-16':{start:1410,dur:450,pause:[[215,10]],gap:[[310,20]],snore:42,talk:3,status:'partial',tags:[]},
+ '10-15':{start:1390,dur:460,pause:[[250,20]],gap:[],snore:58,talk:1,status:'complete',tags:['饮酒']},
+ '10-14':{status:'none'},
+ '10-13':{start:40,dur:72,pause:[],gap:[],snore:4,talk:0,status:'insufficient',tags:['熬夜']},
+ '10-12':{start:1430,dur:410,pause:[],gap:[],snore:25,talk:2,status:'complete',tags:['运动']},
+ '10-11':{start:1400,dur:435,pause:[],gap:[],snore:0,talk:0,status:'complete',tags:['侧睡']},
+ '10-10':{start:5,dur:415,pause:[],gap:[],snore:31,talk:1,status:'complete',tags:['侧睡']},
+ '10-09':{start:1420,dur:430,pause:[],gap:[],snore:36,talk:2,status:'complete',tags:[]},
+ '10-08':{status:'none'}
+};
+const NIGHTS=[],NMAP={};
+for(let i=0;i<30;i++){
+ const dt=new Date(2026,8,17+i),m=dt.getMonth()+1,d=dt.getDate(),id=m+'-'+pad(d);
+ let n=DEF[id];
+ if(!n){const r=rng(id);
+  if(['9-20','9-26','9-27','10-04'].includes(id))n={status:'none'};
+  else if(id==='9-30')n={start:60,dur:95,pause:[],gap:[],snore:6,talk:0,status:'insufficient',tags:['熬夜']};
+  else{const T=['饮酒','鼻塞','侧睡','熬夜','运动'];n={start:(1380+Math.floor(r()*80))%1440,dur:390+Math.floor(r()*70),pause:[],gap:[],snore:Math.floor(8+r()*48),talk:Math.floor(r()*3.6),status:'complete',tags:r()<.3?[T[Math.floor(r()*5)]]:[]};}
+ }
+ n={...n,id,m,d,wk:WK[dt.getDay()],age:Math.round((TODAY-dt)/864e5)};
+ if(n.status!=='none')n.eff=n.dur-[...n.pause,...n.gap].reduce((a,p)=>a+p[1],0);
+ NIGHTS.push(n);NMAP[id]=n;
+}
+const FIX=[['snore',72,6,2],['snore',110,4,1],['talk',142,8,2],['snore',181,12,3],['talk',258,14,2],['snore',280,8,2],['snore',332,5,1],['talk',366,5,1],['snore',405,7,2]];
+const EV={};
+function evs(n){
+ if(EV[n.id])return EV[n.id];let L=[];
+ if(n.id==='10-16')L=FIX.map(f=>({type:f[0],off:f[1],len:f[2],lvl:f[3]}));
+ else if(n.status!=='none'){const r=rng(n.id+'e');
+  if(n.snore>0){const k=Math.max(1,Math.min(5,Math.round(n.snore/9)));const fr=[.16,.31,.46,.63,.8];const b=Math.floor(n.snore/k),rem=n.snore-b*k;for(let j=0;j<k;j++)L.push({type:'snore',off:Math.round(fr[j]*n.dur),len:b+(j<rem?1:0),lvl:1+Math.floor(r()*3)});}
+  const tf=[.27,.55,.72];for(let j=0;j<n.talk;j++)L.push({type:'talk',off:Math.round(tf[j]*n.dur),len:4+Math.floor(r()*14),lvl:1+Math.floor(r()*3)});
+  L.sort((a,b)=>a.off-b.off);}
+ L.forEach((e,i)=>{e.id=n.id+'#'+i;e.night=n.id;e.clock=clk(n.start+e.off);e.durSec=e.type==='snore'?e.len*60:e.len;});
+ EV[n.id]=L;return L;
+}
+function wave(id,type,N){const r=rng(id+'w'),o=[];for(let i=0;i<N;i++){let v;if(type==='snore')v=.18+.75*Math.pow(Math.sin(i/N*Math.PI*7+.4),2)*(.75+r()*.25);else v=(i>N*.12&&i<N*.88)?.2+r()*.8:.08+r()*.12;o.push(v);}return o;}
+const pct=x=>(x*100).toFixed(2)+'%';
+const dtx=m=>{const h=Math.floor(m/60),mm=m%60;return h?(h+' 小时'+(mm?' '+mm+' 分':'')):mm+' 分钟';};
+const fs=s=>{s=Math.floor(s);return Math.floor(s/60)+':'+pad(s%60);};
+const dShort=m=>m>=60?Math.floor(m/60)+'h'+pad(m%60)+'m':m+'m';
+const TC={snore:'#D9A85B',talk:'#A99BE6'},TS={snore:'rgba(217,168,91,.15)',talk:'rgba(169,155,230,.16)'},TT={snore:'#E2B56A',talk:'#B7AAEC'};
+
+class Component extends DCLogic {
+ state={screen:'home',hasData:true,micPerm:'granted',env:'quiet',checking:false,session:null,shade:false,sheet:null,
+  night:'10-16',reportFrom:'home',tlSel:null,meta:{},filter:'all',cur:null,player:null,playing:false,pos:0,
+  tags:{},feel:{},note:'',draftTags:[],range:7,trSel:'10-16',retention:'7',clearedUnfav:false,snack:null,corrPick:null,genStep:0,confirm:null};
+ componentDidMount(){this.iv=setInterval(()=>this.tick(),250);}
+ componentWillUnmount(){clearInterval(this.iv);clearTimeout(this.st);(this.gt||[]).forEach(clearTimeout);}
+ tick(){const s=this.state,u={};
+  if(s.playing&&s.cur){const rc=this.findRec(s.cur);const np=s.pos+.25;if(!rc||np>=rc.durSec){u.pos=rc?rc.durSec:0;u.playing=false;}else u.pos=np;}
+  if(s.session&&!s.session.paused){const sp=(this.props.monitorSpeed??'60×')==='60×'?60:1;u.session={...s.session,elapsed:s.session.elapsed+.25*sp};}
+  if(Object.keys(u).length)this.setState(u);}
+ snack(text,undo){clearTimeout(this.st);this.setState({snack:{text,undo}});this.st=setTimeout(()=>this.setState({snack:null}),4500);}
+ recs(nid){const n=NMAP[nid],s=this.state;return evs(n).map(e=>{const mt=s.meta[e.id]||{};const fav=!!mt.fav;const ageClean=!fav&&((s.retention==='7'&&n.age>7)||(s.retention==='30'&&n.age>30));const cleaned=ageClean||(s.clearedUnfav&&!fav);return {...e,fav,corr:mt.corr||null,deleted:!!mt.deleted,cleaned,cleanReason:ageClean?'录音已按设置清理':'录音已清理'};});}
+ findRec(id){if(!id)return null;return this.recs(id.split('#')[0]).find(x=>x.id===id);}
+ stats(nid){const rs=this.recs(nid);const n=NMAP[nid];const snore=rs.filter(x=>x.type==='snore'&&!x.corr).reduce((a,x)=>a+x.len,0);const talk=rs.filter(x=>x.type==='talk'&&!x.corr).length;const ratio=n.eff>=180?Math.round(snore/n.eff*100):null;return {snore,talk,ratio};}
+ setMeta(id,patch){this.setState(s=>({meta:{...s.meta,[id]:{...(s.meta[id]||{}),...patch}}}));}
+ openRec(id,play){this.setState({cur:id,player:'full',playing:!!play,pos:0,sheet:null});}
+ playable(nid){return this.recs(nid).filter(x=>!x.deleted&&!x.cleaned);}
+
+ renderVals(){
+  const s=this.state,P=this.props,set=o=>this.setState(o),e=React.createElement;
+  const scr=s.screen,on={};['onboard','home','precheck','monitor','generating','report','recordings','history','trends','settings','denied'].forEach(k=>on[k]=scr===k);
+  const showNav=['home','history','trends','settings'].includes(scr);
+  const sess=s.session,el=sess?Math.floor(sess.elapsed):0;
+  const hms=pad(Math.floor(el/3600))+':'+pad(Math.floor(el/60)%60)+':'+pad(el%60);
+  const simClock=clk(1410+el/60);
+  const paused=!!(sess&&sess.paused);
+  const nightCtx=on.monitor||s.shade||(sess&&!on.report);
+  const goTab=t=>set({screen:t,player:s.player==='full'?'mini':s.player,sheet:null});
+  const openReport=(nid,from)=>this.setState({screen:'report',night:nid,reportFrom:from,tlSel:null,sheet:null,player:s.player==='full'?'mini':s.player});
+  const startFlow=()=>{if(s.micPerm==='granted')this.goPrecheck();else if(s.micPerm==='denied')set({screen:'denied'});else set({sheet:'perm'});};
+  this.goPrecheck=this.goPrecheck||(()=>{this.setState({screen:'precheck',checking:true,sheet:null});setTimeout(()=>this.setState({checking:false}),900);});
+  const endAndReport=()=>{(this.gt||[]).forEach(clearTimeout);this.setState({session:null,sheet:null,shade:false,screen:'generating',genStep:0,hasData:true});this.gt=[600,1200,1800].map((t,i)=>setTimeout(()=>this.setState({genStep:i+1}),t)).concat([setTimeout(()=>this.setState({screen:'report',night:'10-16',reportFrom:'home',tlSel:null}),2400)]);};
+
+  const cur=this.findRec(s.cur);
+  const act={
+   stop:ev=>ev.stopPropagation(),
+   finishOnboard:()=>set({screen:'home'}),
+   goHome:()=>set({screen:'home',sheet:null}),
+   startFlow,
+   toMonitor:()=>set({screen:'monitor'}),
+   openLastReport:()=>openReport('10-16','home'),
+   permContinue:()=>set({sheet:'sysperm'}),
+   permLater:()=>{set({sheet:null});this.snack('随时可以从首页开始监测');},
+   sysAllow:()=>{this.setState({micPerm:'granted'});this.goPrecheck();},
+   sysDeny:()=>set({micPerm:'denied',sheet:null,screen:'denied'}),
+   gotoSettingsGrant:()=>{this.setState({micPerm:'granted'});this.goPrecheck();this.snack('已在系统设置中开启麦克风');},
+   recheck:()=>{this.setState({env:'quiet'});this.goPrecheck();},
+   startMonitor:()=>set({session:{elapsed:0,paused:false},screen:'monitor'}),
+   togglePause:ev=>{ev&&ev.stopPropagation&&ev.stopPropagation();if(sess)set({session:{...sess,paused:!sess.paused}});},
+   askEnd:()=>set({sheet:'end'}),
+   openShade:()=>set({shade:true}),
+   closeShade:()=>set({shade:false}),
+   shadeOpen:()=>set({shade:false,screen:'monitor'}),
+   shadeEnd:ev=>{ev.stopPropagation();set({shade:false,screen:'monitor',sheet:'end'});},
+   endAndReport,
+   closeSheet:()=>{if(s.sheet==='sysperm')return;if(s.player==='full'&&!s.sheet)set({player:'mini'});else set({sheet:null});},
+   reportBack:()=>set({screen:s.reportFrom,player:null,playing:false}),
+   toReport:()=>set({screen:'report'}),
+   openRecs:()=>set({screen:'recordings',filter:'all'}),
+   openTags:()=>set({sheet:'tags',draftTags:s.tags[s.night]??(NMAP[s.night].tags||[]),note:''}),
+   noteChange:ev=>set({note:ev.target.value}),
+   saveTags:()=>{const t=[...s.draftTags];if(s.note.trim())t.push(s.note.trim());set({tags:{...s.tags,[s.night]:t},sheet:null,note:''});this.snack('标签已保存');},
+   goSettings:()=>set({screen:'settings',player:null,playing:false}),
+   expandPlayer:()=>set({player:'full'}),
+   collapsePlayer:()=>set({player:'mini'}),
+   closePlayer:ev=>{ev.stopPropagation();set({player:null,playing:false,cur:null});},
+   playToggle:()=>{if(!cur)return;if(!s.playing&&s.pos>=cur.durSec)set({pos:0,playing:true});else set({playing:!s.playing});},
+   playToggleStop:ev=>{ev.stopPropagation();act.playToggle();},
+   back10:()=>set({pos:Math.max(0,s.pos-10)}),
+   fwd10:()=>cur&&set({pos:Math.min(cur.durSec,s.pos+10)}),
+   seek:ev=>{if(!cur)return;const rc=ev.currentTarget.getBoundingClientRect();set({pos:Math.max(0,Math.min(1,(ev.clientX-rc.left)/rc.width))*cur.durSec});},
+   prevRec:()=>{if(!cur)return;const L=this.playable(cur.night),i=L.findIndex(x=>x.id===cur.id);if(i>0)set({cur:L[i-1].id,pos:0});},
+   nextRec:()=>{if(!cur)return;const L=this.playable(cur.night),i=L.findIndex(x=>x.id===cur.id);if(i<L.length-1)set({cur:L[i+1].id,pos:0});},
+   favCur:()=>{if(!cur)return;this.setMeta(cur.id,{fav:!cur.fav});this.snack(cur.fav?'已取消收藏':'已收藏，不会被自动清理');},
+   openCorrect:()=>set({sheet:'correct',corrPick:null}),
+   openMore:()=>set({sheet:'more'}),
+   share:()=>{set({sheet:null});this.snack('已打开系统分享面板');},
+   askDelete:()=>set({sheet:'confirm',confirm:'rec'}),
+   submitCorrect:()=>{if(!cur||!s.corrPick)return;const prev=cur.corr,id=cur.id,label=s.corrPick;this.setMeta(id,{corr:label});set({sheet:null});this.snack('已标记为「'+label+'」，统计已更新',()=>{this.setMeta(id,{corr:prev});this.setState({snack:null});});},
+   openCal:()=>set({sheet:'cal'}),
+   range7:()=>set({range:7}),
+   range30:()=>set({range:30}),
+   openRet:()=>set({sheet:'ret'}),
+   askClearUnfav:()=>set({sheet:'confirm',confirm:'unfav'}),
+   askClearAll:()=>set({sheet:'confirm',confirm:'all'}),
+   micSetting:()=>{if(s.micPerm==='granted')this.snack('已打开系统应用权限设置');else set({screen:'denied'});},
+   notifSetting:()=>this.snack('已打开系统通知设置'),
+   help:()=>this.snack('使用说明：放好手机 → 开始监测 → 早晨查看报告')
+  };
+
+  // home
+  const last=this.stats('10-16');
+  const home={has:s.hasData,empty:!s.hasData,session:!!sess,showStart:!sess,greet:sess?'晚上好':'早上好',
+   sub:sess?'今晚的监测正在进行':s.hasData?'昨晚的报告已经准备好':'从今晚开始了解夜间的声音',sessState:paused?'监测已暂停':'监测进行中'};
+  const pulseDot=e('span',{style:{width:8,height:8,borderRadius:4,background:paused?'#7F8A9B':'#78C7BB',animation:paused?'none':'msPulse 2s ease-in-out infinite'}});
+
+  // precheck
+  const ck=s.checking,busy=s.env==='busy',noisy=s.env==='noisy';
+  const ST={ok:['circle-check','#78C7BB'],warn:['triangle-alert','#D9A85B'],err:['circle-x','#E8907F'],wait:['loader-circle','#7F8A9B'],na:['minus','#7F8A9B']};
+  const mk=(icon,title,val,st)=>({icon,title,val,stIcon:ST[st][0],stColor:ST[st][1],valColor:st==='err'?'#F0AFA2':st==='warn'?'#EBC27E':'#AAB4C2'});
+  const pc={checks:[
+   mk('mic','麦克风',ck?'检测中…':busy?'被其他应用占用':'可用',ck?'wait':busy?'err':'ok'),
+   mk('battery-medium','电量',ck?'检测中…':'68% · 建议连接充电器',ck?'wait':'ok'),
+   mk('hard-drive','存储空间',ck?'检测中…':'剩余 23.4 GB · 充足',ck?'wait':'ok'),
+   mk('ear','环境声音',ck?'检测中…':busy?'无法检测':noisy?'声音较多，可能影响识别':'较安静',ck?'wait':busy?'na':noisy?'warn':'ok')],
+   noisy:noisy&&!ck,busy:busy&&!ck,canStart:!busy||ck,showRecheck:(noisy||busy)&&!ck,startLabel:noisy?'仍然开始监测':'开始监测',btnOpacity:ck?.4:1};
+  if(ck)act.startMonitor=()=>{};
+
+  // monitor
+  const sp=(P.monitorSpeed??'60×')==='60×';
+  const mon={hms,clock:simClock,stateText:paused?'已暂停':'正在监测',stateColor:paused?'#8A94A3':'#5FA79C',pauseLabel:paused?'继续监测':'暂停',pauseIcon:paused?'play':'pause',
+   hint:paused?'暂停期间不录音，报告时间轴会标记为暂停。':'可以锁屏，监测会在后台继续。'+(sp?'（原型计时 60 倍速）':''),
+   elapsedText:dtx(Math.floor(el/60))||'不到 1 分钟',dim:P.monitorDim??1,notifTitle:paused?'已暂停监测':'正在监测'};
+  if(Math.floor(el/60)===0)mon.elapsedText='不到 1 分钟';
+  const ps=paused?'paused':'running';
+  const breath=e('div',{style:{position:'relative',width:220,height:220,display:'flex',alignItems:'center',justifyContent:'center'}},
+   [0,1,2].map(i=>e('div',{key:'r'+i,style:{position:'absolute',inset:0,borderRadius:'50%',border:'1px solid rgba(95,167,156,.5)',animation:`msBreath 7.5s ease-out ${i*2.5}s infinite`,animationPlayState:ps,opacity:paused?0:undefined}})),
+   e('div',{key:'c',style:{width:96,height:96,borderRadius:48,background:'rgba(95,167,156,.08)',display:'flex',gap:5,alignItems:'center',justifyContent:'center'}},
+    [0,1,2,3,4].map(i=>e('div',{key:i,style:{width:4,height:[18,30,40,30,18][i],borderRadius:2,background:paused?'#3A4658':'#4F8D84',animation:`msWave ${3+i*.3}s ease-in-out ${i*.25}s infinite`,animationPlayState:ps}}))));
+  const spinner=e('div',{style:{width:48,height:48,borderRadius:'50%',border:'3px solid #2B3749',borderTopColor:'#78C7BB',animation:'msSpin 1s linear infinite'}});
+  const gen=['整理录音片段','识别鼾声与说话声','汇总时间轴与统计'].map((l,i)=>({label:l,icon:s.genStep>i?'circle-check':s.genStep===i?'loader-circle':'circle',color:s.genStep>i?'#A6DED5':s.genStep===i?'#F1ECE3':'#5E6878'}));
+
+  // report
+  const n=NMAP[s.night]||NMAP['10-16'];const rs=this.recs(n.id),stt=this.stats(n.id);
+  const insuff=n.status==='insufficient',quiet=!insuff&&stt.snore===0&&stt.talk===0;
+  const vis=rs.filter(x=>!x.deleted);
+  const allClean=vis.length>0&&vis.every(x=>x.cleaned);
+  const nd=n.start>=720&&n.start+n.dur>=1440;
+  const pauseMin=n.pause.reduce((a,p)=>a+p[1],0),gapMin=n.gap.reduce((a,p)=>a+p[1],0);
+  const longest=rs.filter(x=>x.type==='snore'&&!x.corr).sort((a,b)=>b.len-a.len)[0];
+  let ov;
+  if(insuff)ov=`有效监测仅 ${dtx(n.eff)}，低于生成完整报告所需的 3 小时。${stt.snore?`期间检测到鼾声 ${stt.snore} 分钟。`:'期间未检测到明显鼾声。'}`;
+  else if(quiet)ov=`有效监测 ${dtx(n.eff)}，整晚未检测到明显鼾声，也未检测到疑似梦话。`;
+  else ov=`有效监测 ${dtx(n.eff)}。${stt.snore?`鼾声累计 ${stt.snore} 分钟，最长一段从 ${longest.clock} 开始，持续约 ${longest.len} 分钟`:'未检测到明显鼾声'}；${stt.talk?`另有 ${stt.talk} 段疑似梦话`:'未检测到疑似梦话'}。`;
+  n.gap.forEach(g=>ov+=` ${clk(n.start+g[0])}–${clk(n.start+g[0]+g[1])} 录音中断，该时段没有数据。`);
+  if(pauseMin)ov+=` 期间手动暂停 ${pauseMin} 分钟。`;
+  const W=n.dur;const sel=s.tlSel;
+  const blocks=[];
+  rs.filter(x=>x.type==='snore').forEach(x=>{const h=[0,16,26,36][x.lvl];blocks.push({left:pct(x.off/W),width:pct(Math.max(x.len/W,.01)),h:h+'px',top:((44-h)/2)+'px',bg:x.corr?'#4A5568':'#D9A85B',border:'none',ring:sel===x.id?'0 0 0 2px #F1ECE3':'none',onClick:()=>set({tlSel:x.id})});});
+  n.pause.forEach((p,i)=>blocks.push({left:pct(p[0]/W),width:pct(p[1]/W),h:'44px',top:'0',bg:'repeating-linear-gradient(135deg,#6B7585 0 2px,#243044 2px 5px)',border:'none',ring:sel==='p'+i?'0 0 0 2px #F1ECE3':'none',onClick:()=>set({tlSel:'p'+i})}));
+  n.gap.forEach((g,i)=>blocks.push({left:pct(g[0]/W),width:pct(g[1]/W),h:'44px',top:'0',bg:'#101722',border:'1.5px dashed #E8907F',ring:sel==='g'+i?'0 0 0 2px #F1ECE3':'none',onClick:()=>set({tlSel:'g'+i})}));
+  const talks=rs.filter(x=>x.type==='talk').map(x=>({left:pct(x.off/W),color:x.corr?'#6B7585':'#A99BE6',ring:sel===x.id?'0 0 0 2px #F1ECE3':'none',onClick:()=>set({tlSel:x.id})}));
+  const ticks=[];const step=W<180?30:120;for(let t=Math.ceil(n.start/step)*step;t<=n.start+W;t+=step){const off=t-n.start;if(off/W>.06&&off/W<.94)ticks.push({left:pct(off/W),label:clk(t)});}
+  ticks.unshift({left:'3%',label:clk(n.start)});ticks.push({left:'97%',label:clk(n.start+W)});
+  let selVM=null;
+  if(sel){if(sel[0]==='p'){const p=n.pause[+sel.slice(1)];selVM={color:'#6B7585',title:`暂停 · ${clk(n.start+p[0])}–${clk(n.start+p[0]+p[1])}`,sub:`${p[1]} 分钟 · 手动暂停，此时段未录音`,canPlay:false};}
+   else if(sel[0]==='g'){const g=n.gap[+sel.slice(1)];selVM={color:'#E8907F',title:`录音中断 · ${clk(n.start+g[0])}–${clk(n.start+g[0]+g[1])}`,sub:`${g[1]} 分钟 · 麦克风被来电占用，此时段无数据`,canPlay:false};}
+   else{const x=rs.find(y=>y.id===sel);if(x){const tn=x.corr?'已修正：'+x.corr:x.type==='snore'?'鼾声':'疑似梦话';const can=!x.deleted&&!x.cleaned;selVM={color:x.corr?'#6B7585':TC[x.type],title:`${tn} · ${x.clock}${x.type==='snore'?'–'+clk(n.start+x.off+x.len):''}`,sub:`${x.type==='snore'?x.len+' 分钟':x.len+' 秒'} · 相对强度 ${LV[x.lvl]}${x.deleted?' · 录音已删除':x.cleaned?' · '+x.cleanReason:''}`,canPlay:can,onPlay:()=>this.openRec(x.id,true)};}}}
+  const recVM=(x,headline)=>{const t=x.corr?null:x.type;const live=!x.cleaned;const isCur=s.cur===x.id&&s.player;const playingThis=isCur&&s.playing;
+   return {headline,clock:x.clock,durText:x.type==='snore'?x.len+' 分钟':x.len+' 秒',typeName:x.corr?'已修正：'+x.corr:x.type==='snore'?'鼾声':'疑似梦话',
+    color:t?TC[t]:'#8A94A3',soft:t?TS[t]:'#243044',tagColor:t?TT[t]:'#AAB4C2',bars:wave(x.id,x.type,30).map(v=>({h:Math.round(3+v*17)+'px'})),
+    live,cleaned:x.cleaned,cleanReason:x.cleanReason,op:live?1:.35,playIcon:playingThis?'pause':'play',ring:isCur?'0 0 0 1.5px #78C7BB':'none',cardBg:isCur?'#1F2B3C':'#1B2533',
+    favColor:x.fav?'#E2B56A':'#7F8A9B',
+    onOpen:()=>live&&this.openRec(x.id,false),onPlay:ev=>{ev.stopPropagation();if(!live)return;if(isCur)set({playing:!s.playing,player:s.player});else this.openRec(x.id,true);},
+    onFav:ev=>{ev.stopPropagation();this.setMeta(x.id,{fav:!x.fav});this.snack(x.fav?'已取消收藏':'已收藏，不会被自动清理');}};};
+  const pt=vis.filter(x=>x.type==='talk'&&!x.corr&&!x.cleaned).sort((a,b)=>b.len-a.len)[0];
+  const psn=vis.filter(x=>x.type==='snore'&&!x.corr&&!x.cleaned).sort((a,b)=>b.len-a.len)[0];
+  const reps=[];if(pt)reps.push(recVM(pt,'一段疑似梦话'));if(psn)reps.push(recVM(psn,'较长的一段鼾声'));
+  const feelV=s.feel[n.id];
+  const tagsNow=s.tags[n.id]??(n.tags||[]);
+  const r={title:`${n.m}月${n.d}日 ${n.wk} 夜间`,range:`${clk(n.start)} – ${nd?'次日 ':''}${clk(n.start+n.dur)}`,session:dtx(n.dur),insuff,overview:ov,
+   effH:Math.floor(n.eff/60),effM:pad(n.eff%60),effText:dtx(n.eff),effPct:pct(n.eff/n.dur),pausePct:pct(pauseMin/n.dur),gapPct:pct(gapMin/n.dur),hasPause:pauseMin>0,hasGap:gapMin>0,pauseMin,gapMin,
+   hasSnore:stt.snore>0,noSnore:stt.snore===0,snore:stt.snore,ratioW:pct(Math.min(1,(stt.ratio||0)/30)),ratioText:stt.ratio==null?'占比未计算':'占比 '+stt.ratio+'%',
+   hasTalk:stt.talk>0,noTalk:stt.talk===0,talk:stt.talk,blocks,talks,ticks,emptyTl:blocks.length===0&&talks.length===0,hasSel:!!selVM,sel:selVM||{},
+   reps,showReps:reps.length>0,allClean:allClean&&!quiet,cleanReason:vis[0]?vis[0].cleanReason:'',noEvents:vis.length===0,recCount:vis.length,
+   feels:[['smile','精神较好'],['meh','一般'],['frown','比较疲惫']].map(([icon,label])=>{const a=feelV===label;return {icon,label,bg:a?'rgba(120,199,187,.16)':'transparent',border:a?'#78C7BB':'#2B3749',color:a?'#A6DED5':'#D8D2C8',onClick:()=>set({feel:{...s.feel,[n.id]:a?null:label}})};}),
+   tags:tagsNow,tagBtn:tagsNow.length?'编辑':'添加标签'};
+  if(!r.showReps&&!r.allClean&&!r.noEvents)r.noEvents=true;
+
+  // recordings list
+  const cnt={all:vis.length,snore:vis.filter(x=>x.type==='snore'&&!x.corr).length,talk:vis.filter(x=>x.type==='talk'&&!x.corr).length,fav:vis.filter(x=>x.fav).length};
+  const flt=vis.filter(x=>s.filter==='all'||(s.filter==='fav'?x.fav:(x.type===s.filter&&!x.corr)));
+  const rl={sub:`${n.m}月${n.d}日 夜间 · ${vis.length} 段`,filters:[['all','全部'],['snore','鼾声'],['talk','疑似梦话'],['fav','收藏']].map(([k,l])=>{const a=s.filter===k;return {label:l,count:cnt[k],bg:a?'rgba(120,199,187,.16)':'transparent',border:a?'transparent':'#2B3749',color:a?'#A6DED5':'#D8D2C8',onClick:()=>set({filter:k})};}),
+   items:flt.map(x=>recVM(x,'')),empty:flt.length===0,emptyTitle:s.filter==='fav'?'还没有收藏的录音':'没有这类录音',emptyBody:s.filter==='fav'?'在播放器中点击星标收藏，收藏的录音不会被自动清理。':'可以切换其他筛选查看。'};
+
+  // player
+  let pl={mini:false,full:false};
+  if(cur&&s.player){const t=cur.corr?null:cur.type;const L=this.playable(cur.night),i=L.findIndex(x=>x.id===cur.id);const pr=cur.durSec?s.pos/cur.durSec:0;const wv=wave(cur.id,cur.type,56);const col=t?TC[t]:'#8A94A3';const cn=NMAP[cur.night];
+   pl={mini:s.player==='mini',full:s.player==='full',typeName:cur.corr?'已修正：'+cur.corr:cur.type==='snore'?'鼾声':'疑似梦话',clock:cur.clock,color:col,soft:t?TS[t]:'#243044',tagColor:t?TT[t]:'#AAB4C2',
+    meta:`${cn.m}月${cn.d}日夜间 · ${cur.type==='snore'?cur.len+' 分钟':cur.len+' 秒'} · 相对强度 ${LV[cur.lvl]}`,idxText:`第 ${i+1} / ${L.length} 段`,
+    bars:wv.map((v,j)=>({h:Math.round(8+v*84)+'px',c:(j+.5)/56<=pr?col:'#3A4658'})),pct:pct(pr),posText:fs(s.pos),totText:fs(cur.durSec),playIcon:s.playing?'pause':'play',
+    prevColor:i>0?'#F1ECE3':'#4A5568',nextColor:i<L.length-1?'#F1ECE3':'#4A5568',favColor:cur.fav?'#E2B56A':'#F1ECE3',favLabel:cur.fav?'已收藏':'收藏',miniBottom:showNav?'110px':'28px'};}
+  const opts=cur&&cur.type==='talk'?['不是说话声','普通说话','电视或音乐','其他人的声音','其他声音']:['不是鼾声','普通说话','电视或音乐','其他人的声音','其他声音'];
+  const corrOpts=opts.map(o=>{const a=s.corrPick===o;return {label:o,ringC:a?'#78C7BB':'#5E6878',dotC:a?'#78C7BB':'transparent',onClick:()=>set({corrPick:o})};});
+
+  // confirm sheet
+  const unfavMb=Math.round(NIGHTS.reduce((a,nn)=>nn.status==='none'?a:a+this.recs(nn.id).filter(x=>!x.cleaned&&!x.deleted&&!x.fav).reduce((b,x)=>b+(x.type==='snore'?x.len*.48:x.len*.03),0),0));
+  const favMb=Math.round(NIGHTS.reduce((a,nn)=>nn.status==='none'?a:a+this.recs(nn.id).filter(x=>!x.cleaned&&!x.deleted&&x.fav).reduce((b,x)=>b+(x.type==='snore'?x.len*.48:x.len*.03),0),0)*10)/10;
+  const CF={
+   rec:{title:'删除这段录音？',body:'录音文件会从本机删除。',lose:'这段录音文件（无法再回听）',keep:'报告中的统计与时间轴事件保留',ok:'删除',onOk:()=>{if(!cur)return;const id=cur.id;this.setMeta(id,{deleted:true});this.setState({sheet:null,player:null,playing:false,cur:null});this.snack('已删除 1 段录音，统计数据保留',()=>{this.setMeta(id,{deleted:false});this.setState({snack:null});});}},
+   unfav:{title:'清理未收藏录音？',body:`将清理全部未收藏的录音，约释放 ${unfavMb} MB。`,lose:'所有未收藏的录音文件',keep:'收藏的录音、报告统计、标签与趋势',ok:'清理',onOk:()=>{this.setState({clearedUnfav:true,sheet:null});this.snack(`已清理未收藏录音，释放 ${unfavMb} MB`);}},
+   all:{title:'清除全部数据？',body:'眠声会回到首次使用的状态，此操作无法撤销。',lose:'全部录音（含收藏）、报告、标签与趋势',keep:'系统中的麦克风权限设置不受影响',ok:'全部清除',onOk:()=>{this.setState({hasData:false,meta:{},tags:{},feel:{},sheet:null,screen:'home',player:null,cur:null,playing:false,clearedUnfav:false});this.snack('已清除全部数据');}}
+  };
+  const cf=CF[s.confirm]||CF.rec;
+
+  // history
+  const STL={complete:['完整记录','rgba(120,199,187,.14)','#A6DED5'],partial:['部分中断','rgba(232,144,127,.14)','#EDA99B'],insufficient:['数据不足','#2B3749','#AAB4C2']};
+  const hist=NIGHTS.slice(-10).reverse().map(nn=>{if(nn.status==='none')return {has:false,none:true,d:nn.d,wk:nn.wk};const st2=this.stats(nn.id);const L=STL[nn.status];const vr=this.recs(nn.id).filter(x=>!x.deleted);
+   return {has:true,none:false,d:nn.d,wk:nn.wk,title:`${nn.m}月${nn.d}日 夜间`,stLabel:L[0],stBg:L[1],stColor:L[2],eff:dShort(nn.eff),snore:st2.snore?st2.snore+' 分':'未检测到',talk:st2.talk+' 段',cleaned:vr.length>0&&vr.every(x=>x.cleaned),onOpen:()=>openReport(nn.id,'history')};});
+
+  // calendar
+  const calHead=['一','二','三','四','五','六','日'];
+  const cal=[0,1,2].map(()=>({d:'',bg:'transparent',border:'none',color:'transparent',dot:'transparent',cursor:'default',onClick:()=>{}}));
+  for(let d=1;d<=31;d++){const nn=NMAP['10-'+pad(d)];const has=nn&&nn.status!=='none'&&s.hasData;const dotC=!nn||!s.hasData?'transparent':nn.status==='complete'?'#78C7BB':nn.status==='partial'?'#E8907F':nn.status==='insufficient'?'#7F8A9B':'transparent';
+   cal.push({d,bg:nn&&s.night===nn.id&&has?'rgba(120,199,187,.16)':'transparent',border:d===17?'1px solid #78C7BB':'none',color:d>17?'#4A5568':has?'#F1ECE3':'#7F8A9B',dot:dotC,cursor:has?'pointer':'default',onClick:()=>has&&openReport(nn.id,'history')});}
+
+  // trends
+  const R=s.range,days=NIGHTS.slice(-R);
+  const vals=days.map(nn=>{if(nn.status==='none')return {nn,none:true};const st2=this.stats(nn.id);return {nn,none:false,ins:nn.status==='insufficient',...st2};});
+  let path='',pen=false;
+  vals.forEach((v,i)=>{const ok=!v.none&&!v.ins&&v.ratio!=null;if(ok){const x=((i+.5)/R*100).toFixed(2),y=(120-Math.min(16,v.ratio)/16*120).toFixed(1);path+=(pen?'L':'M')+x+' '+y+' ';pen=true;}else pen=false;});
+  const tdays=vals.map((v,i)=>{const a=s.trSel===v.nn.id;const lab=R===7?`${v.nn.m}/${v.nn.d}`:(i%5===4||i===R-1?`${v.nn.m}/${v.nn.d}`:'');
+   return {none:v.none,label:lab,labelC:a?'#F1ECE3':'#7F8A9B',selBg:a?'rgba(241,236,227,.07)':'transparent',
+    snoreH:v.none?'0px':Math.max(2,Math.round(Math.min(60,v.snore)/60*140))+'px',snoreC:v.ins?'repeating-linear-gradient(135deg,#6B7585 0 2px,#2B3749 2px 4px)':a?'#E9BE73':'#D9A85B',
+    hasRatio:!v.none&&!v.ins&&v.ratio!=null,ratioB:(!v.none&&v.ratio!=null?Math.min(16,v.ratio)/16*120:0)+'px',dot:R===7?'10px':'7px',
+    talkH:v.none||v.ins?'0px':Math.round(v.talk/4*80)+'px',onSel:()=>set({trSel:v.nn.id})};});
+  const sv=vals.find(v=>v.nn.id===s.trSel)||vals[vals.length-1];
+  const selT={title:`${sv.nn.m}月${sv.nn.d}日 ${sv.nn.wk}`,sub:sv.none?'当天未监测':sv.ins?`数据不足 · 有效监测 ${dtx(sv.nn.eff)}`:`鼾声 ${sv.snore?sv.snore+' 分钟':'未检测到'} · 占比 ${sv.ratio}% · 疑似梦话 ${sv.talk} 段`,canOpen:!sv.none,onOpen:()=>openReport(sv.nn.id,'trends')};
+  const okN=vals.filter(v=>!v.none&&!v.ins);
+  const tagMap={};okN.forEach(v=>(s.tags[v.nn.id]??v.nn.tags??[]).forEach(t=>{(tagMap[t]=tagMap[t]||[]).push(v);}));
+  const tagRows=Object.keys(tagMap).filter(t=>['饮酒','鼻塞','侧睡','熬夜','运动'].includes(t)).map(t=>{const w=tagMap[t],o=okN.filter(v=>!w.includes(v));const aw=Math.round(w.reduce((a,v)=>a+v.snore,0)/w.length),ao=o.length?Math.round(o.reduce((a,v)=>a+v.snore,0)/o.length):0;return {tag:t,n:w.length,w:aw,o:ao,wW:pct(Math.min(1,aw/60)),oW:pct(Math.min(1,ao/60))};}).sort((a,b)=>b.n-a.n).slice(0,3);
+  const tr={days:tdays,is7:R===7,is30:R===30,b7:R===7?'rgba(120,199,187,.16)':'transparent',c7:R===7?'#A6DED5':'#D8D2C8',b30:R===30?'rgba(120,199,187,.16)':'transparent',c30:R===30?'#A6DED5':'#D8D2C8',
+   gap:R===7?'8px':'2px',barW:R===7?'18px':'70%',ratioPath:path.trim()||'M0 120',sel:selT,tagRows,
+   summary:`近 ${R} 天监测 ${vals.filter(v=>!v.none).length} 晚${vals.some(v=>v.ins)?`（${vals.filter(v=>v.ins).length} 晚数据不足）`:''}，未监测 ${vals.filter(v=>v.none).length} 晚。点击日期查看当晚。`};
+
+  // settings
+  const totMb=Math.round((unfavMb+favMb)*10)/10;
+  const st={mb:Math.round(totMb),favMb,otherMb:unfavMb,favW:pct(totMb?favMb/totMb:0),otherW:pct(totMb?unfavMb/totMb:0),retLabel:{'7':'7 天','30':'30 天',manual:'手动清理'}[s.retention]+' · 收藏的录音始终保留',micLabel:s.micPerm==='granted'?'已允许':'未允许',micColor:s.micPerm==='granted'?'#A6DED5':'#F0AFA2'};
+  const retOpts=[['7','7 天','超过 7 天的未收藏录音自动清理'],['30','30 天','超过 30 天的未收藏录音自动清理'],['manual','手动清理','不自动清理，注意存储空间']].map(([k,l,sub])=>{const a=s.retention===k;return {label:l,sub,ringC:a?'#78C7BB':'#5E6878',dotC:a?'#78C7BB':'transparent',onClick:()=>{set({retention:k,sheet:null});this.snack('保留期限已改为 '+l);}};});
+
+  const tagOpts=['饮酒','鼻塞','侧睡','熬夜','运动'].map(t=>{const a=s.draftTags.includes(t);return {label:t,on:a,bg:a?'rgba(120,199,187,.16)':'transparent',border:a?'#78C7BB':'#2B3749',color:a?'#A6DED5':'#D8D2C8',onClick:()=>set({draftTags:a?s.draftTags.filter(x=>x!==t):[...s.draftTags,t]})};});
+
+  const nav=[['home','首页','house'],['history','记录','calendar-days'],['trends','趋势','chart-column'],['settings','设置','settings']].map(([k,l,ic])=>{const a=scr===k;return {label:l,icon:ic,pill:a?'rgba(120,199,187,.18)':'transparent',color:a?'#A6DED5':'#AAB4C2',weight:a?600:400,onClick:()=>goTab(k)};});
+
+  const sh={};['perm','sysperm','end','tags','correct','more','confirm','ret','cal'].forEach(k=>sh[k]=s.sheet===k);
+  const scrim=!!s.sheet||s.player==='full';
+
+  const snackBottom=(s.player==='mini'?(showNav?182:100):(showNav?112:32))+'px';
+  const snack={show:!!s.snack,text:s.snack&&s.snack.text,hasUndo:!!(s.snack&&s.snack.undo),undo:()=>s.snack&&s.snack.undo&&s.snack.undo(),bottom:snackBottom};
+
+  const sc=(label,fn)=>({label,go:fn});
+  const base={sheet:null,shade:false,player:null,playing:false,cur:null,checking:false};
+  const scenarios=[
+   sc('首次使用',()=>set({...base,hasData:false,micPerm:'unknown',session:null,screen:'onboard'})),
+   sc('有记录的首页',()=>set({...base,hasData:true,micPerm:'granted',session:null,screen:'home',env:'quiet'})),
+   sc('首页 · 监测进行中',()=>set({...base,hasData:true,micPerm:'granted',session:{elapsed:4520,paused:false},screen:'home'})),
+   sc('麦克风权限被拒绝',()=>set({...base,micPerm:'denied',screen:'denied'})),
+   sc('环境声音较多',()=>{this.setState({...base,micPerm:'granted',env:'noisy'});this.goPrecheck();}),
+   sc('麦克风暂不可用',()=>{this.setState({...base,micPerm:'granted',env:'busy'});this.goPrecheck();}),
+   sc('监测暂停',()=>set({...base,session:{elapsed:9000,paused:true},screen:'monitor'})),
+   sc('Android 持续通知',()=>set({...base,session:sess||{elapsed:4350,paused:false},screen:'monitor',shade:true})),
+   sc('报告生成中',()=>{this.setState({...base,hasData:true});endAndReport();}),
+   sc('未检测到事件',()=>set({...base,hasData:true,screen:'report',night:'10-11',reportFrom:'history',tlSel:null})),
+   sc('数据不足',()=>set({...base,hasData:true,screen:'report',night:'10-13',reportFrom:'history',tlSel:null})),
+   sc('录音已清理',()=>set({...base,hasData:true,retention:'7',screen:'report',night:'10-09',reportFrom:'history',tlSel:null}))
+  ];
+  const flow=[
+   ['首页',()=>set({...base,hasData:true,micPerm:'granted',session:null,screen:'home',env:'quiet'})],
+   ['开始前检查',()=>{this.setState({...base,micPerm:'granted',env:'quiet'});this.goPrecheck();}],
+   ['夜间监测中',()=>set({...base,session:sess||{elapsed:0,paused:false},screen:'monitor'})],
+   ['结束确认面板',()=>set({...base,session:sess||{elapsed:26400,paused:false},screen:'monitor',sheet:'end'})],
+   ['早晨报告',()=>set({...base,hasData:true,screen:'report',night:'10-16',reportFrom:'home',tlSel:'10-16#3'})],
+   ['播放疑似梦话',()=>set({...base,hasData:true,screen:'report',night:'10-16',reportFrom:'home',cur:'10-16#4',player:'full',pos:0})],
+   ['收藏或修正',()=>set({...base,hasData:true,screen:'recordings',night:'10-16',reportFrom:'home',filter:'all',cur:'10-16#4',player:'full',sheet:'correct',corrPick:null})]
+  ].map(([label,go],i)=>({n:pad(i+1),label,go}));
+  const swatches=[['页面背景','#101722'],['卡片','#1B2533'],['卡片·浮层','#243044'],['主色','#78C7BB'],['疑似梦话','#A99BE6'],['鼾声','#D9A85B'],['中断 / 危险','#E8907F'],['正文','#F1ECE3'],['次要文字','#AAB4C2'],['辅助文字','#7F8A9B']].map(([n2,c])=>({n:n2,c}));
+
+  return {on,showNav,showPanels:P.showPanels??true,phoneBg:on.monitor?'#05080D':'#101722',
+   sb:{time:nightCtx&&sess?simClock:'07:12',color:on.monitor?'#4E5868':'#F1ECE3',gesture:on.monitor?.15:.45},
+   act,home,last,pulseDot,pc,mon,breath,spinner,gen,r,rl,pl,corrOpts,corrOp:s.corrPick?1:.4,cf,hist,cal,calHead,tr,st,retOpts,tagOpts,noteVal:s.note,nav,sh,scrim,shade:s.shade,snack,scenarios,flow,swatches};
+ }
+}
+</script>
+</body>
+</html>
