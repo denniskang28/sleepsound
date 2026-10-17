@@ -4,7 +4,7 @@
 
 ## 直接下载并安装 APK
 
-**[下载眠声 v0.1.0 测试版 APK](https://github.com/denniskang28/sleepsound/releases/download/v0.1.0/sleepsound-0.1.0-debug.apk)** · Android 9 / API 28 及以上 · 约 56 MB
+**[下载眠声 v0.1.1 Release APK](https://github.com/denniskang28/sleepsound/releases/download/v0.1.1/sleepsound-0.1.1-release.apk)** · Android 9 / API 28 及以上 · 约 32 MB
 
 也可以打开 [Releases 下载页面](https://github.com/denniskang28/sleepsound/releases)，在版本下方的 **Assets** 中选择以 `.apk` 结尾的安装包。`Source code (zip)` 和 `Source code (tar.gz)` 是源码，不能直接安装到手机。
 
@@ -16,7 +16,7 @@
 
 如果先下载到电脑，可以通过 USB、蓝牙或文件传输工具把 `.apk` 文件复制到手机，再在手机文件管理器中点击安装。
 
-当前提供的是 **v0.1.0 调试签名测试版**。新安装没有演示记录；短时间试用会显示“数据不足”，因为有效监测少于 3 小时不计算鼾声占比。识别准确度和真实手机整夜稳定性仍需验证，首版不提供 REM / 浅睡 / 深睡分期。
+当前提供的是 **v0.1.1 Release 签名版**，包含新的月牙声波桌面图标，关闭调试并启用代码压缩、混淆与资源裁剪。正式包名为 `com.miansheng.sleep`；此前的 Debug 版包名带 `.debug`，两者可同时安装，数据不会自动迁移。新安装没有演示记录；短时间试用会显示“数据不足”，因为有效监测少于 3 小时不计算鼾声占比。识别准确度和真实手机整夜稳定性仍需验证，首版不提供 REM / 浅睡 / 深睡分期。
 
 下载文件的 SHA-256 校验值见同一版本 Assets 中的 `SHA256SUMS.txt`。
 
@@ -39,6 +39,8 @@
 ```
 
 本地 SDK 路径放入不提交的 `local.properties`，例如 `sdk.dir=/path/to/Android/sdk`。Debug 安装包输出到 `app/build/outputs/apk/debug/app-debug.apk`，包名 `com.miansheng.sleep.debug`。Release 包名 `com.miansheng.sleep`。
+
+Release 构建需配置本机签名密钥，执行 `./gradlew :app:assembleRelease :app:testReleaseUnitTest :app:lintRelease`，安装包输出到 `app/build/outputs/apk/release/app-release.apk`。签名配置、校验与发布步骤见 [Release 发布说明](docs/releasing.md)。私钥和密码不得提交到仓库。
 
 ## 已实现范围
 

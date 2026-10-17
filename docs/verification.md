@@ -2,6 +2,16 @@
 
 验证日期：2026-10-17。
 
+## v0.1.1 Release 验证
+
+- `:app:assembleRelease :app:testReleaseUnitTest :app:lintRelease` 通过；6 项单元测试全部通过，Release Lint 无错误。
+- 正式包名 `com.miansheng.sleep`，`versionCode=2`，`versionName=0.1.1`；包含新的自适应桌面图标。
+- APK 为 33,549,891 字节（约 32 MiB），启用 R8 压缩、混淆及资源裁剪。
+- `apksigner verify` 通过，使用独立的 RSA 3072 位 Release 证书，APK v2 签名；证书 SHA-256：`50e2a6a0e4684fe437a6b581c43b19e5c4eaf486f5e2a97cf4c6122348d954ae`。
+- APK 清单未开启 `debuggable`；所有 8 个原生库均不含 `.debug*`、`.zdebug*`、`.symtab` 调试段；未打入 Compose 预览/测试工具、签名私钥或 R8 mapping。
+- APK SHA-256：`6dd88976224893f64456e7dee43ec74a75821dfa0ade55dfa92612c66e1a91c3`。
+- 在独立 API 36 ARM64 模拟器上安装成功，正式 Activity 启动返回 `Status: ok`。
+
 ## 环境与结果
 
 - JDK 21、Gradle 8.11.1、Android SDK 35。

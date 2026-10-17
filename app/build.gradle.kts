@@ -1,9 +1,32 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 }
+
+val releaseSigningFile = rootProject.file(
+    providers.gradleProperty("releaseSigningProperties")
+        .orElse(providers.environmentVariable("MIANSHENG_RELEASE_SIGNING_PROPERTIES"))
+        .getOrElse("${System.getProperty("user.home")}/.android/miansheng/signing.properties")
+)
+val releaseSigning = Properties().apply {
+    if (releaseSigningFile.isFile) releaseSigningFile.inputStream().use { load(it) }
+}
+val validateReleaseSigning by tasks.registering {
+    doLast {
+        check(releaseSigningFile.isFile) {
+            "Release signing is required. Configure releaseSigningProperties; see docs/releasing.md."
+        }
+        listOf("storeFile", "storePassword", "keyAlias", "keyPassword").forEach {
+            check(!releaseSigning.getProperty(it).isNullOrBlank()) { "Missing release signing property: $it" }
+        }
+        check(file(releaseSigning.getProperty("storeFile")).isFile) { "Release keystore does not exist." }
+    }
+}
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(validateReleaseSigning) }
 
 android {
     namespace = "com.miansheng.sleep"
@@ -12,13 +35,30 @@ android {
         applicationId = "com.miansheng.sleep"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        if (releaseSigningFile.isFile) {
+            create("release") {
+                storeFile = file(releaseSigning.getProperty("storeFile"))
+                storePassword = releaseSigning.getProperty("storePassword")
+                keyAlias = releaseSigning.getProperty("keyAlias")
+                keyPassword = releaseSigning.getProperty("keyPassword")
+            }
+        }
     }
     buildTypes {
         debug { applicationIdSuffix = ".debug" }
-        release { isMinifyEnabled = false }
+        release {
+            isDebuggable = false
+            isJniDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
