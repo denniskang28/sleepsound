@@ -12,6 +12,7 @@ import androidx.test.uiautomator.UiDevice
 import com.miansheng.sleep.audio.*
 import com.miansheng.sleep.data.*
 import com.miansheng.sleep.ui.*
+import com.miansheng.sleep.domain.*
 import kotlinx.coroutines.runBlocking
 import org.junit.*
 import org.junit.Assert.*
@@ -41,8 +42,89 @@ class AppFlowTest {
             compose.runOnIdle { MonitorService.command(compose.activity,MonitorService.STOP) }
             compose.waitUntil(10000) { MonitorService.live.value.state == SessionState.FINISHED }
         }
-        compose.runOnIdle { vm.closePlayer() }
+        compose.runOnIdle { vm.calibration.cancel(); vm.closePlayer() }
         runBlocking { fixtureIds.forEach { app.repository.deleteSession(it) } }
+    }
+
+    @Test(timeout=90000) fun calibrationWizardSavesAndDisablesWithoutRewritingHistoricalLevels() {
+        val oldId=app.repository.activeCalibrationId.value
+        try {
+            compose.runOnIdle { vm.screen=Screen.SETTINGS }
+            compose.onNodeWithText("声音校准").performScrollTo().performClick()
+            compose.onNodeWithText("声音校准").assertExists()
+            screenshot("sound-calibration-setup")
+            listOf(35.0,45.0,55.0).forEach { reference ->
+                compose.runOnIdle {
+                    vm.calibration.state.value=vm.calibration.state.value.copy(pending=CalibrationCapture(reference-90.0,1.0,30225,
+                        "test-fixture-only","测试夹具（非真实校准）"))
+                }
+                compose.onNodeWithText("参考仪器 LAeq（dBA）").performScrollTo().performTextInput(reference.toString())
+                compose.onNodeWithText("保存本组参考值").performScrollTo().performClick()
+            }
+            compose.onNodeWithText("参考声级计型号／编号").performScrollTo().performTextInput("仅测试参考仪器")
+            compose.onNodeWithText("保存并启用校准").performScrollTo().performClick()
+            compose.waitUntil(10000){app.repository.activeCalibrationId.value!=null && app.repository.activeCalibrationId.value!=oldId}
+            val savedId=app.repository.activeCalibrationId.value!!
+            runBlocking { assertEquals(90.0,app.repository.dao.calibration(savedId)!!.offset,0.0) }
+            screenshot("sound-calibration-result")
+            compose.onNodeWithText("停用当前校准").performScrollTo().performClick()
+            compose.onNodeWithText("停用",substring=false).performClick()
+            compose.waitUntil(5000){app.repository.activeCalibrationId.value==null}
+            runBlocking { assertNotNull(app.repository.dao.calibration(savedId)) }
+        } finally {
+            runBlocking { oldId?.let { app.repository.dao.calibration(it) }?.let { app.repository.saveCalibration(it.copy(id=UUID.randomUUID().toString())) } }
+            compose.runOnIdle { vm.calibration.reset() }
+        }
+    }
+
+    @Test(timeout=90000) fun soundReportShowsRealStatisticsAndLabelsWaveformSeparately() {
+        val session=SleepSession(startedAt=System.currentTimeMillis()-60000,endedAt=System.currentTimeMillis(),state=SessionState.FINISHED,effectiveMs=19500)
+        fixtureIds+=session.id
+        runBlocking {
+            app.repository.dao.insertSession(session)
+            app.repository.dao.insertLevels((0 until 20).map { SoundLevelFrame(session.id,session.startedAt+it*975L,dbfs=if(it==19)-20.0 else -40.0,aDbfs=if(it==19)-23.0 else -43.0) })
+        }
+        compose.waitUntil(10000){vm.data.value.sessions.any { it.id==session.id }}
+        compose.runOnIdle { vm.openReport(session.id) }
+        compose.waitUntil(10000){vm.data.value.levels.any { it.sessionId==session.id }}
+        compose.onNodeWithText("夜间声音强度").performScrollTo().assertExists()
+        compose.onNodeWithText("-32.3").assertExists()
+        compose.onNodeWithText("-20.0").assertExists()
+        compose.onNodeWithText("-40.0").assertExists()
+        screenshot("sound-level-report")
+    }
+
+    @Test(timeout=30000) fun measurementConfigurationRemainsStableAcrossRecorderReopen() {
+        fun captureKey():String = MeasurementInput(compose.activity).use { input ->
+            assertTrue(input.read(ShortArray(LEVEL_WINDOW)))
+            requireNotNull(input.configKey())
+        }
+        val first=captureKey()
+        val second=captureKey()
+        assertEquals("配置签名不能包含每次变化的音频会话 ID",first,second)
+    }
+
+    @Test(timeout=90000) fun playerKeepsItsOwnLevelsWhenAnotherNightIsOpened() {
+        val first=seedPrototypeNight()
+        val second=SleepSession(startedAt=System.currentTimeMillis()-60000,endedAt=System.currentTimeMillis(),state=SessionState.FINISHED)
+        fixtureIds+=second.id
+        val event=runBlocking {
+            val event=app.repository.dao.events().first { it.sessionId==first.id }
+            app.repository.dao.insertSession(second)
+            app.repository.dao.insertLevels(listOf(
+                SoundLevelFrame(first.id,event.startedAt,dbfs=-37.0,aDbfs=-40.0),
+                SoundLevelFrame(second.id,second.startedAt,dbfs=-55.0,aDbfs=-58.0)))
+            event
+        }
+        compose.waitUntil(10000){vm.data.value.sessions.any { it.id==second.id }}
+        compose.runOnIdle { vm.openReport(first.id); vm.openPlayer(event) }
+        compose.waitUntil(10000){vm.data.value.levels.any { it.sessionId==first.id }}
+        compose.runOnIdle { vm.openReport(second.id); vm.playerExpanded=true }
+        compose.waitUntil(10000){vm.data.value.levels.map { it.sessionId }.toSet()==setOf(first.id,second.id)}
+        compose.onNodeWithText("事件时段声音 · dBFS").assertExists()
+        compose.onAllNodesWithText("-37.0").onFirst().assertExists()
+        compose.runOnIdle { vm.closePlayer() }
+        compose.waitUntil(10000){vm.data.value.levels.all { it.sessionId==second.id }}
     }
 
     @Test(timeout = 120000) fun reportPlaybackCorrectionAndHistoryUsePersistentData() {

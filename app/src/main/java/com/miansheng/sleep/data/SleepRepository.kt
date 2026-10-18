@@ -14,10 +14,22 @@ class SleepRepository(val context: Context, val database: SleepDatabase) {
     private val preferences = context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
     val onboarded = MutableStateFlow(preferences.getBoolean("onboarded", false))
     val retentionDays = MutableStateFlow(preferences.getInt("retention", 7))
+    val activeCalibrationId = MutableStateFlow(preferences.getString("soundCalibration", null))
     val recordingsDir = File(context.filesDir, "recordings").apply { mkdirs() }
     val sessions = dao.observeSessions()
     val events = dao.observeEvents()
     val segments = dao.observeSegments()
+    val calibrations = dao.observeCalibrations()
+    suspend fun activeCalibration(): SoundCalibration? = activeCalibrationId.value?.let { dao.calibration(it) }
+    suspend fun saveCalibration(value: SoundCalibration) {
+        dao.insertCalibration(value)
+        preferences.edit().putString("soundCalibration", value.id).apply()
+        activeCalibrationId.value = value.id
+    }
+    fun resetCalibration() {
+        preferences.edit().remove("soundCalibration").apply()
+        activeCalibrationId.value = null
+    }
     fun finishOnboarding() { preferences.edit().putBoolean("onboarded", true).apply(); onboarded.value = true }
     suspend fun setRetention(days: Int) {
         preferences.edit().putInt("retention", days).apply(); retentionDays.value = days
@@ -75,6 +87,8 @@ class SleepRepository(val context: Context, val database: SleepDatabase) {
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         dao.events().forEach { deleteClip(it.id) }
         dao.deleteSessions()
+        dao.deleteCalibrations()
+        resetCalibration()
         recordingsDir.listFiles()?.forEach { check(it.delete()) { "部分录音暂时无法清理" } }
         preferences.edit().putBoolean("onboarded", false).apply(); onboarded.value = false
     }
@@ -82,6 +96,7 @@ class SleepRepository(val context: Context, val database: SleepDatabase) {
         dao.unfinished().forEach { session ->
             val last = session.heartbeatAt.coerceAtMost(now)
             dao.segments(session.id).filter { it.endedAt == null }.forEach { dao.closeSegment(it.id, last) }
+            dao.trimLevels(session.id, last)
             dao.updateSession(session.copy(endedAt = last, state = SessionState.FINISHED, recovered = true))
         }
         // A crash between committing a clip and its event must not leave private orphan audio indefinitely.

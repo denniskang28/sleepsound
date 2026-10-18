@@ -1,8 +1,39 @@
-# 首版验证记录
+# 验证记录
 
-验证日期：2026-10-17。
+## v0.2.0 声音强度与校准
+
+验证日期：2026-10-18。使用 JDK 21、Android SDK 35，以及独立 Android 16 / API 36 ARM64 模拟器。
+
+- Release APK 构建通过；14 项 Release 单元测试、13 项 Android 设备测试全部通过，无跳过、无失败。
+- Debug / Release Lint 均为 0 错误、26 项警告（依赖版本与代码风格等建议）。
+- 包名 `com.miansheng.sleep`，`versionCode=3`，`versionName=0.2.0`；未开启 `debuggable`。
+- `apksigner verify` 通过，RSA 3072 位、APK v2 签名，证书与 v0.1.1 相同：`50e2a6a0e4684fe437a6b581c43b19e5c4eaf486f5e2a97cf4c6122348d954ae`。
+- APK 为 33,651,579 字节；SHA-256：`a76d1810d06736bb6584ad6dda1ba426459fe22e6b3d7120955cf4f13e9d32c7`。
+- 正式签名包在专用模拟器上 `adb install -r` 安装成功，冷启动返回 `Status: ok`。
+
+新增验证覆盖：
+
+- 合成正弦波的 dBFS、振幅翻倍约 +6.02 dB、A 计权响应与跨窗口滤波连续性。
+- 能量平均、时长加权 P95、实时直方图与精确统计的一致性，以及全零、过载、缺测和校准范围边界。
+- 三组校准的声级跨度、稳定性和残差检查；校准冻结、混合配置回退为 dBFS。
+- 从真实 v1 表结构迁移到 Room v2，保留历史备注；删除会话级联清理声级，停用校准保留历史配置。
+- 校准向导填写、保存、停用，报告指标与刻度图，以及重新打开麦克风后的配置签名一致性。
+- 查看另一晚报告时，小播放器继续加载所属夜晚声级；关闭播放器后释放额外夜晚的数据订阅。
+- 原有离线模型、AAC 编码、回放、历史、锁屏监测、暂停、恢复与心跳裁剪。
+
+声级报告和校准结果截图使用测试夹具；实际麦克风流程仅验证采集与状态管理。未使用真实 S30 与参考声级计进行声级精度测量，未完成整夜续航验证。安装后需要按 [声音强度与校准说明](sound-levels.md) 完成参考仪器比对，才会在匹配配置下显示估计 dBA；这不构成仪器精度认证。
+
+复现命令：
+
+```sh
+./gradlew :app:assembleRelease :app:testReleaseUnitTest :app:lintRelease :app:lintDebug :app:connectedDebugAndroidTest
+```
+
+Release 构建需要本机签名配置；设备测试需要专用设备或模拟器。
 
 ## v0.1.1 Release 验证
+
+验证日期：2026-10-17。以下为上一发布版本的记录。
 
 - `:app:assembleRelease :app:testReleaseUnitTest :app:lintRelease` 通过；6 项单元测试全部通过，Release Lint 无错误。
 - 正式包名 `com.miansheng.sleep`，`versionCode=2`，`versionName=0.1.1`；包含新的自适应桌面图标。

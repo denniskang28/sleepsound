@@ -82,12 +82,15 @@ class AudioAndStorageTest {
         val session=SleepSession(startedAt=now-60000,heartbeatAt=now-30000,effectiveMs=25000)
         repo.dao.insertSession(session)
         repo.dao.insertSegment(CaptureSegment(sessionId=session.id,startedAt=session.startedAt,kind="active"))
+        repo.dao.insertLevels(listOf(SoundLevelFrame(session.id,session.startedAt,dbfs=-40.0,aDbfs=-45.0),
+            SoundLevelFrame(session.id,now-10000,dbfs=-30.0,aDbfs=-35.0)))
         repo.recoverInterruptedSessions(now)
         val restored=repo.dao.session(session.id)!!
         assertEquals(session.heartbeatAt,restored.endedAt)
         assertEquals(25000L,restored.effectiveMs)
         assertTrue(restored.recovered)
         assertEquals(session.heartbeatAt,repo.dao.segments(session.id).single().endedAt)
+        assertEquals(1,repo.dao.levels(session.id).size)
     }
 
     @Test fun captureHeartbeatNeverOverwritesTagsAndCorrectionsPersist() = runBlocking {

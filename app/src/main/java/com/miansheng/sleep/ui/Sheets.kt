@@ -26,7 +26,7 @@ fun SheetContents(vm: SleepViewModel, data: AppData, session: SleepSession?, pla
                 Box(Modifier.size(56.dp).clip(RoundedCornerShape(18.dp)).background(SleepColors.Primary.copy(alpha = .16f)), contentAlignment = Alignment.Center) { Glyph("mic", SleepColors.Primary, 26) }
                 Txt("需要使用麦克风", 22, weight = FontWeight.SemiBold)
                 Txt("用于在夜间识别鼾声和疑似梦话。", 14, SleepColors.Secondary)
-                listOf("只在你开始监测后录音，结束即停止", "识别在本机完成，录音默认保存在本机", "可以随时在设置中删除录音").forEach { Hint(it, "check", Color(0xFFD8D2C8)) }
+                listOf("只在你主动监测或校准时使用麦克风", "识别在本机完成，录音默认保存在本机", "可以随时在设置中删除录音").forEach { Hint(it, "check", Color(0xFFD8D2C8)) }
                 ActionButton("继续并授权", onClick = requestPermissions)
                 TextButton(onClick = { vm.sheet = null }) { Txt("稍后", 15, SleepColors.Secondary) }
             }
@@ -122,7 +122,9 @@ fun FullPlayer(event: SoundEvent, data: AppData, vm: SleepViewModel) {
         }
         IconTap("chevron-down", "收起播放器", bg = SleepColors.Elevated) { vm.playerExpanded = false }
     }
+    EventSoundLevels(event, data)
     Spacer(Modifier.height(4.dp))
+    Txt("回放波形 · 相对振幅（非分贝尺度）",11,SleepColors.Muted)
     Waveform(event.waveform, color, Modifier.fillMaxWidth().height(96.dp), if (vm.durationMs > 0) vm.positionMs.toFloat()/vm.durationMs else 0f) { fraction -> vm.seek((fraction * vm.durationMs).toLong()) }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Txt(playTime(vm.positionMs), 13, SleepColors.Secondary); Txt(playTime(vm.durationMs), 13, SleepColors.Secondary) }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

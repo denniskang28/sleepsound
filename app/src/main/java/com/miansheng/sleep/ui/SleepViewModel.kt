@@ -18,17 +18,30 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.File
 
-enum class Screen { ONBOARD, HOME, PRECHECK, DENIED, MONITOR, GENERATING, REPORT, RECORDINGS, HISTORY, TRENDS, SETTINGS, HELP }
+enum class Screen { ONBOARD, HOME, PRECHECK, DENIED, MONITOR, GENERATING, REPORT, RECORDINGS, HISTORY, TRENDS, SETTINGS, HELP, CALIBRATION }
 data class AppData(val sessions: List<SleepSession> = emptyList(), val events: List<SoundEvent> = emptyList(),
-                   val segments: List<CaptureSegment> = emptyList(), val live: LiveMonitor = LiveMonitor())
+                   val segments: List<CaptureSegment> = emptyList(), val live: LiveMonitor = LiveMonitor(),
+                   val levels: List<SoundLevelFrame> = emptyList(), val calibrations: List<SoundCalibration> = emptyList())
 data class Precheck(val checking: Boolean = true, val micOk: Boolean = false, val battery: Int = 0,
                     val freeMb: Long = 0, val noisy: Boolean = false, val error: String? = null)
 
 class SleepViewModel(application: Application) : AndroidViewModel(application) {
     val app = application as SleepApplication
     val repo = app.repository
-    val data = combine(repo.sessions, repo.events, repo.segments, MonitorService.live) { s, e, g, l -> AppData(s, e, g, l) }
+    private val levelSessionId = MutableStateFlow<String?>(null)
+    private val playerLevelSessionId = MutableStateFlow<String?>(null)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val reportLevels = combine(levelSessionId, playerLevelSessionId) { report, player ->
+        listOfNotNull(report, player).distinct()
+    }.flatMapLatest { ids ->
+        if (ids.isEmpty()) flowOf(emptyList())
+        else combine(ids.map { repo.dao.observeLevels(it) }) { nights -> nights.flatMap { it } }
+    }
+    private val baseData = combine(repo.sessions, repo.events, repo.segments, MonitorService.live) { s, e, g, l -> AppData(s, e, g, l) }
+    val data = combine(baseData, reportLevels, repo.calibrations) { data, levels, profiles -> data.copy(levels = levels, calibrations = profiles) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppData())
+    val calibration = CalibrationController(app, viewModelScope)
+    val activeCalibrationId = repo.activeCalibrationId
     val retention = repo.retentionDays
     var screen by mutableStateOf(Screen.HOME)
     var loaded by mutableStateOf(false)
@@ -81,6 +94,7 @@ class SleepViewModel(application: Application) : AndroidViewModel(application) {
     fun finishOnboard() { repo.finishOnboarding(); screen = Screen.HOME }
     fun tab(target: Screen) { if (screen == Screen.PRECHECK) cancelPrecheck(); screen = target; playerExpanded = false }
     fun openReport(id: String, from: Screen = screen) {
+        levelSessionId.value = id
         selectedSessionId = id; reportFrom = from; selectedTimelineId = null; screen = Screen.REPORT; playerExpanded = false
     }
     fun back() {
@@ -91,8 +105,14 @@ class SleepViewModel(application: Application) : AndroidViewModel(application) {
             screen == Screen.REPORT -> screen = reportFrom
             screen == Screen.PRECHECK -> { cancelPrecheck(); screen = Screen.HOME }
             screen == Screen.HELP -> screen = Screen.SETTINGS
+            screen == Screen.CALIBRATION -> { calibration.cancel(); screen = Screen.SETTINGS }
             else -> screen = Screen.HOME
         }
+    }
+
+    fun openCalibration() {
+        if (MonitorService.live.value.state != SessionState.FINISHED) { snack("请先结束夜间监测，再校准声音"); return }
+        closePlayer(); cancelPrecheck(); calibration.reset(); screen = Screen.CALIBRATION
     }
 
     fun runPrecheck() {
@@ -127,7 +147,7 @@ class SleepViewModel(application: Application) : AndroidViewModel(application) {
     fun cancelPrecheck() { checkJob?.cancel(); checkJob = null }
     fun startMonitoring() {
         if (precheck.checking || !precheck.micOk || precheck.freeMb < 50) return
-        closePlayer(); cancelPrecheck()
+        closePlayer(); cancelPrecheck(); calibration.cancel()
         try { MonitorService.command(app, MonitorService.START); screen = Screen.MONITOR }
         catch (_: Exception) { snack("无法启动录音，请检查麦克风权限后重试") }
     }
@@ -157,6 +177,7 @@ class SleepViewModel(application: Application) : AndroidViewModel(application) {
                 setOnCompletionListener { playing = false; positionMs = durationMs }
                 setOnErrorListener { _, _, _ -> snack("录音暂时无法播放"); closePlayer(); true }
             }
+            playerLevelSessionId.value = event.sessionId
             playerEventId = event.id; playerExpanded = true; durationMs = mediaPlayer!!.duration.toLong(); positionMs = 0
             if (autoPlay) togglePlayback()
         } catch (_: Exception) { closePlayer(); snack("录音文件不可用") }
@@ -178,7 +199,7 @@ class SleepViewModel(application: Application) : AndroidViewModel(application) {
         val index = all.indexOfFirst { it.id == playerEventId }
         all.getOrNull(index + direction)?.let { openPlayer(it, playing) }
     }
-    fun closePlayer() { runCatching { mediaPlayer?.release() }; mediaPlayer = null; playerEventId = null; playing = false; playerExpanded = false }
+    fun closePlayer() { runCatching { mediaPlayer?.release() }; mediaPlayer = null; playerLevelSessionId.value = null; playerEventId = null; playing = false; playerExpanded = false }
     fun pausePlayback() { if (playing) runCatching { mediaPlayer?.pause() }; playing = false }
     fun correct(event: SoundEvent) {
         val choice = correctionChoice ?: return
@@ -225,7 +246,7 @@ class SleepViewModel(application: Application) : AndroidViewModel(application) {
             runCatching { repo.deleteSession(session.id) }.onSuccess { screen = Screen.HISTORY; snack("已删除本次记录与相关录音") }.onFailure { snack("删除未完成，请重试") }
         }
     }
-    override fun onCleared() { closePlayer(); cancelPrecheck(); super.onCleared() }
+    override fun onCleared() { calibration.cancel(); closePlayer(); cancelPrecheck(); super.onCleared() }
 }
 
 fun clipMessage(event: SoundEvent) = when (event.clipState) {

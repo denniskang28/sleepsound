@@ -102,6 +102,7 @@ fun SleepApp(vm: SleepViewModel) {
                     Screen.TRENDS -> TrendsScreen(data, vm)
                     Screen.SETTINGS -> SettingsScreen(data, retention, vm)
                     Screen.HELP -> HelpScreen(vm)
+                    Screen.CALIBRATION -> CalibrationScreen(data, vm)
                 }
                 if (playerEvent != null && !vm.playerExpanded && vm.screen != Screen.MONITOR) {
                     Box(Modifier.align(Alignment.BottomCenter).padding(12.dp)) { MiniPlayer(playerEvent, vm) }

@@ -18,19 +18,21 @@ import java.io.File
 data class LiveMonitor(
     val sessionId: String? = null, val startedAt: Long = 0, val effectiveMs: Long = 0,
     val state: String = SessionState.FINISHED, val message: String = "", val stopping: Boolean = false,
+    val currentLevel: LevelReading? = null, val levels: LevelStats? = null,
+    val calibration: SoundCalibration? = null, val levelMessage: String = "未校准 · 相对录音电平",
 )
 
 class MonitorService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var job: Job? = null
     @Volatile private var requestedState = SessionState.RUNNING
-    @Volatile private var clientSilenced = false
     private var wakeLock: PowerManager.WakeLock? = null
     private val app get() = application as SleepApplication
     private val repo get() = app.repository
     private var session: SleepSession? = null
     private var segment: CaptureSegment? = null
-    private var recorder: AudioRecord? = null
+    private var recorder: MeasurementInput? = null
+    private val pendingLevels = mutableListOf<SoundLevelFrame>()
     private var lastPersist = 0L
 
     override fun onBind(intent: Intent?) = null
@@ -66,8 +68,14 @@ class MonitorService : Service() {
         var assembler = EventAssembler()
         var ring = AudioRing(16000 * 132)
         var captureAnchor = 0L
+        var meter = SoundLevelMeter()
+        var configKey: String? = null
+        val rawStats = LiveLevelAccumulator()
+        val weightedStats = LiveLevelAccumulator()
+        var calibrationConsistent = true
         try {
             app.ready.await()
+            val calibration = repo.activeCalibration()
             classifier = SoundClassifier(this)
             check(classifier.windowSize == 15600) { "Unexpected audio model input" }
             val start = System.currentTimeMillis()
@@ -87,24 +95,41 @@ class MonitorService : Service() {
                 }
                 try {
                     if (recorder == null) {
-                        recorder = createRecorder(classifier.windowSize).apply { startRecording() }
-                        check(recorder!!.recordingState == AudioRecord.RECORDSTATE_RECORDING) { "麦克风暂不可用" }
+                        recorder = MeasurementInput(this)
+                        meter = SoundLevelMeter(); configKey = null
                         ring = AudioRing(16000 * 132); assembler = EventAssembler()
                         captureAnchor = System.currentTimeMillis()
                         transition(SessionState.RUNNING)
                     }
-                    var filled = 0
-                    while (filled < pcm.size && requestedState == SessionState.RUNNING) {
-                        val count = recorder!!.read(pcm, filled, pcm.size - filled, AudioRecord.READ_BLOCKING)
-                        check(count > 0) { "录音输入已中断" }
-                        filled += count
-                    }
-                    if (filled != pcm.size) continue
-                    check(!clientSilenced) { "麦克风被系统静音或其他应用占用" }
+                    if (!recorder!!.read(pcm) { requestedState == SessionState.RUNNING && scope.isActive }) continue
                     check(repo.recordingsDir.usableSpace > 20 * 1024 * 1024) { "存储空间不足，请清理后继续" }
                     val prediction = classifier.classify(pcm)
                     val offset = ring.written
                     ring.append(pcm)
+                    val currentKey = recorder!!.configKey()
+                    if (currentKey != configKey) { configKey = currentKey; meter = SoundLevelMeter() }
+                    val matched = calibration != null && currentKey != null && currentKey == calibration.configKey
+                    val reading = meter.accept(pcm)
+                    if (reading != null) {
+                        pendingLevels += SoundLevelFrame(session!!.id, captureAnchor+offset*1000/16000,
+                            dbfs = reading.dbfs, aDbfs = reading.aDbfs, status = reading.status,
+                            calibrationId = calibration?.id.takeIf { matched })
+                        if (reading.status == "valid") {
+                            rawStats.add(reading.dbfs!!)
+                            weightedStats.add(reading.aDbfs!!)
+                            if (!matched) calibrationConsistent = false
+                        }
+                    }
+                    val usableCalibration = calibration.takeIf { matched && calibrationConsistent }
+                    live.value = live.value.copy(currentLevel = reading,
+                        levels = if (usableCalibration != null) weightedStats.stats()?.let { it.copy(mean = it.mean+usableCalibration.offset,
+                            maximum = it.maximum+usableCalibration.offset, p95 = it.p95+usableCalibration.offset) } else rawStats.stats(),
+                        calibration = usableCalibration, levelMessage = when {
+                            calibration == null -> "未校准 · 相对录音电平"
+                            !matched -> "麦克风或录音配置与校准不匹配 · 显示 dBFS"
+                            !calibrationConsistent -> "本次含未校准时段 · 汇总显示 dBFS"
+                            else -> "已校准 · 估计 dBA · 16 kHz 限带"
+                        })
                     assembler.accept(prediction, offset, pcm.size).forEach { saveDetection(it, ring, captureAnchor) }
                     session = session!!.copy(effectiveMs = session!!.effectiveMs + pcm.size * 1000L / 16000)
                     live.value = live.value.copy(effectiveMs = session!!.effectiveMs)
@@ -126,31 +151,13 @@ class MonitorService : Service() {
                 classifier?.close()
                 val end = System.currentTimeMillis()
                 segment?.let { repo.dao.closeSegment(it.id, end) }
-                session?.let { repo.dao.finishCapture(it.id, it.effectiveMs, end) }
+                session?.let { persistLevels(); repo.dao.finishCapture(it.id, it.effectiveMs, end) }
                 live.value = live.value.copy(state = SessionState.FINISHED, stopping = false)
                 if (wakeLock?.isHeld == true) wakeLock?.release()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
-    }
-
-    private fun createRecorder(frame: Int): AudioRecord {
-        check(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) { "需要麦克风权限" }
-        val manager = getSystemService(AUDIO_SERVICE) as AudioManager
-        val source = if (manager.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED) == "true") MediaRecorder.AudioSource.UNPROCESSED else MediaRecorder.AudioSource.MIC
-        clientSilenced = false
-        return AudioRecord.Builder().setAudioSource(source)
-            .setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(16000).setChannelMask(AudioFormat.CHANNEL_IN_MONO).build())
-            .setBufferSizeInBytes(maxOf(AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT), frame * 8))
-            .build().also { record ->
-                check(record.state == AudioRecord.STATE_INITIALIZED) { "此设备暂不支持录音" }
-                if (Build.VERSION.SDK_INT >= 29) record.registerAudioRecordingCallback(mainExecutor, object : AudioManager.AudioRecordingCallback() {
-                    override fun onRecordingConfigChanged(configs: MutableList<AudioRecordingConfiguration>) {
-                        clientSilenced = configs.firstOrNull { it.clientAudioSessionId == record.audioSessionId }?.isClientSilenced == true
-                    }
-                })
-            }
     }
 
     private suspend fun transition(state: String, reason: String = "") {
@@ -161,16 +168,21 @@ class MonitorService : Service() {
             kind = when (state) { SessionState.RUNNING -> "active"; SessionState.PAUSED -> "pause"; else -> "gap" }, reason = reason)
         repo.dao.insertSegment(segment!!)
         session = session!!.copy(state = state)
-        live.value = live.value.copy(state = state, message = reason)
+        live.value = live.value.copy(state = state, message = reason, currentLevel = null)
         persist()
     }
 
     private suspend fun persist() {
+        persistLevels()
         val now = System.currentTimeMillis()
         session = session!!.copy(heartbeatAt = now)
         repo.dao.updateCapture(session!!.id, session!!.state, session!!.effectiveMs, now)
         lastPersist = SystemClock.elapsedRealtime()
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(NOTIFICATION, notification())
+    }
+
+    private suspend fun persistLevels() {
+        if (pendingLevels.isNotEmpty()) { repo.dao.insertLevels(pendingLevels.toList()); pendingLevels.clear() }
     }
 
     private suspend fun saveDetection(detection: Detection, ring: AudioRing, anchor: Long) {
@@ -190,7 +202,7 @@ class MonitorService : Service() {
             waveform = ClipWriter.waveform(pcm)))
     }
 
-    private fun releaseRecorder() { recorder?.let { runCatching { it.stop() }; it.release() }; recorder = null }
+    private fun releaseRecorder() { recorder?.close(); recorder = null }
 
     private fun notification(title: String? = null): Notification {
         val paused = requestedState == SessionState.PAUSED

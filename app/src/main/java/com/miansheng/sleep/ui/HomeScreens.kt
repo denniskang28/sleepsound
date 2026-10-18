@@ -255,7 +255,7 @@ fun MonitorScreen(live: LiveMonitor, vm: SleepViewModel) {
                 Spacer(Modifier.height(18.dp))
                 Txt(clock(now), 92, Color(0xFFB9B3A9), FontWeight.Light, numeric = true)
                 Txt(LocalDate.now().format(DateTimeFormatter.ofPattern("M月d日 EEEE", Locale.SIMPLIFIED_CHINESE)), 14, Color(0xFF5E6878))
-                Box(Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxWidth().height(160.dp), contentAlignment = Alignment.Center) {
                     Canvas(Modifier.size(220.dp)) {
                         repeat(3) { i -> val progress = if (paused || interrupted) .5f else (breath + i * .25f) % 1f
                             drawCircle(Color(0xFF3E786F).copy(alpha = (1-progress)*.3f), radius = size.minDimension / 2 * (.35f + progress * .65f), style = Stroke(1.dp.toPx())) }
@@ -264,6 +264,8 @@ fun MonitorScreen(live: LiveMonitor, vm: SleepViewModel) {
                         listOf(18, 30, 40, 30, 18).forEachIndexed { i, height -> Box(Modifier.width(4.dp).height((height * if (paused || interrupted) .25f else .4f + breath * .6f).dp).clip(CircleShape).background(Color(0xFF4F8D84))) }
                     }
                 }
+                LiveSoundLevels(live)
+                Spacer(Modifier.height(16.dp))
                 Row(Modifier.fillMaxWidth().drawBehind { drawLine(Color(0xFF121A24),Offset.Zero,Offset(size.width,0f),1.dp.toPx()); drawLine(Color(0xFF121A24),Offset(0f,size.height),Offset(size.width,size.height),1.dp.toPx()) }) {
                     Column(Modifier.weight(1f).padding(vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) { Txt("有效监测", 12, Color(0xFF5E6878)); Txt(hms(live.effectiveMs), 24, Color(0xFFA39D94), FontWeight.Medium) }
                     Column(Modifier.weight(1f).borderStart().padding(vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) { Txt("开始时间", 12, Color(0xFF5E6878)); Txt(clock(live.startedAt), 24, Color(0xFFA39D94), FontWeight.Medium) }

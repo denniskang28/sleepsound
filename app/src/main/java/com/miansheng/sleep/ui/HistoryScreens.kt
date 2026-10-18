@@ -210,6 +210,11 @@ fun SettingsScreen(data:AppData,retention:Int,vm:SleepViewModel) {
             SettingRow("清理未收藏录音","统计数据会保留") { vm.sheet="clearUnfav" }
         }
         Hint("录音默认仅保存在本机，不会上传。收藏的录音受保护，不会被自动清理。","shield-check")
+        Txt("声音测量",13,SleepColors.Primary,modifier=Modifier.padding(top=6.dp))
+        val calibrationId by vm.activeCalibrationId.collectAsState()
+        SleepCard(padding=0) {
+            SettingRow("声音校准",if(calibrationId==null)"未校准 · 显示相对电平 dBFS" else "已保存校准 · 使用时核对麦克风配置","audio-lines",onClick=vm::openCalibration)
+        }
         Txt("权限与通知",13,SleepColors.Primary,modifier=Modifier.padding(top=6.dp))
         SleepCard(padding=0) {
             val allowed=ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED
@@ -221,7 +226,7 @@ fun SettingsScreen(data:AppData,retention:Int,vm:SleepViewModel) {
             SettingRow("使用说明",icon="book-open") { vm.screen=Screen.HELP }
             SettingRow("清除全部数据",icon="trash-2",danger=true) { vm.sheet="clearAll" }
         }
-        Txt("眠声 0.1.0",12,Color(0xFF5E6878),modifier=Modifier.padding(4.dp))
+        Txt("眠声 ${com.miansheng.sleep.BuildConfig.VERSION_NAME}",12,Color(0xFF5E6878),modifier=Modifier.padding(4.dp))
     }
 }
 
@@ -244,6 +249,8 @@ fun HelpScreen(vm:SleepViewModel) {
                 "早晨回听" to "结束监测后查看报告，回听鼾声和疑似梦话。检测可能受风扇、电视和同床者影响，可以手动修正误判。",
                 "理解监测数据" to "有效监测时长来自成功采集的声音，不等于睡眠时长。少于 3 小时的会话显示数据不足，占比不计算。没有检测到声音事件不代表没有发生。",
                 "录音保留与隐私" to "默认仅在本机识别并保存事件片段，不上传声音。可以设置保留期限，收藏片段不会被自动清理。主动分享的录音将交给你选择的应用。",
+                "理解声音强度" to "未校准显示 dBFS，相对满刻度 0 dBFS，越接近 0 信号越强。校准后为手机位置处的限带估计 dBA。平均按声能计算；最高为约 0.975 秒窗口最大值；P95 是升序第 95 百分位，不是声学 L95。无有效信号与过载不计入统计，波形为相对振幅。",
+                "校准声音" to "在设置中进入声音校准，使用参考声级计的 A 计权 LAeq，完成至少三组稳定声源比对；相邻参考值差至少 5 dB，总跨度至少 15 dB。只在比对范围内显示估计数值，换手机、麦克风或录音配置后重新校准。",
                 "识别能力说明" to "当前使用通用预训练声音模型，尚未完成真实卧室准确度验证。疑似梦话仅表示检测到人声，无法确认说话者和睡眠状态。首版不提供睡眠分期或医疗诊断。").forEachIndexed { index,(title,body) ->
                 SleepCard { Txt("${index+1}. $title",16,weight=FontWeight.SemiBold);Txt(body,14,SleepColors.Secondary) }
             }

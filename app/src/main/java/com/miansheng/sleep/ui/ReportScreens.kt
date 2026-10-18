@@ -79,6 +79,7 @@ fun ReportScreen(session: SleepSession, data: AppData, vm: SleepViewModel) {
                     else Txt("未检测到疑似梦话", 16, weight = FontWeight.Medium)
                 }
             }
+            SoundLevelReport(session, data)
             SleepCard {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Txt("夜间声音时间轴", 16, weight = FontWeight.SemiBold); Txt("点击事件查看", 12, SleepColors.Muted) }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
